@@ -23,6 +23,16 @@ interface NFTAsist {
   fueTransferido?: boolean
 }
 
+export interface ProofOfWorkData {
+  fecha: string
+  alumno: string
+  emisor: string
+  PoF: {
+    id: number
+    tema: string
+  }[]
+}
+
 // Conexión con Metamask y obtención del provider
 export function getProvider(): BrowserProvider {
   const ethProvider = (window as Window & { ethereum?: Eip1193Provider }).ethereum;
@@ -208,6 +218,8 @@ export const getMintDateFromEvents = async (
 
 // Verifica si fue transferido después de recibido
 // Recibe todos los eventos TransferSingle() filtrados por token y wallet si alguno tiene from === wallet significa que la wallet fue la que envió el NFT, es decir, lo transfirió fuera.
+
+// ir por el minteo segun contrato... (feat)
 export const wasTransferredOut = (
   events: (Log | EventLog)[],
   wallet: string
@@ -217,4 +229,16 @@ export const wasTransferredOut = (
       "args" in e &&
       e.args.from.toLowerCase() === wallet.toLowerCase()
   )
+}
+
+export const mintProofOfWorkNFT = async (
+  contract: Contract,
+  data: ProofOfWorkData
+): Promise<void> => {
+  console.log("🔨 Mint ProofOfWorkNFT con los siguientes datos:")
+  console.log(data)
+
+  // Simulación de llamada al contrato (más adelante se reemplaza por: contract.mintTP(...))
+  await new Promise((resolve) => setTimeout(resolve, 1500))
+  console.log("✅ ProofOfWorkNFT emitido correctamente (simulado)")
 }
