@@ -206,7 +206,6 @@ export const getMintDateFromEvents = async (
   return new Date(block.timestamp * 1000)
 }
 
-
 // Verifica si fue transferido después de recibido
 // Recibe todos los eventos TransferSingle() filtrados por token y wallet si alguno tiene from === wallet significa que la wallet fue la que envió el NFT, es decir, lo transfirió fuera.
 export const wasTransferredOut = (
