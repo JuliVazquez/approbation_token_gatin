@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// URI : "ipfs://bafkreibimlves3n72f6ve4grqarekjp6smfbeak5jxq7c66psil5jvtt44"
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
@@ -10,30 +9,47 @@ contract TEST_POW is ERC1155, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
+    struct PoFEntry {
+        uint256 id;
+        string tema;
+    }
+
     struct TPData {
         string fecha;
         string alumno;
         address emisor;
+        PoFEntry[] PoF;
     }
 
     mapping(uint256 => TPData) private datos;
 
     constructor(string memory uri_) ERC1155(uri_) Ownable(msg.sender) {}
 
-    function mintAndTransferTest(address receptor, TPData calldata input) external {
-        require(bytes(input.alumno).length > 0, "Alumno requerido");
-        // require(input.emisor == msg.sender, "Solo el alumno puede emitir");
+    function mintAndTransferTest(
+        address receptor,
+        string calldata fecha,
+        string calldata alumno,
+        address emisor,
+        PoFEntry[] calldata PoF
+    ) external {
+        require(bytes(alumno).length > 0, "Alumno requerido");
+        require(emisor == msg.sender, "Solo el alumno puede emitir");
 
         _tokenIdCounter.increment();
         uint256 newTokenId = _tokenIdCounter.current();
 
-        datos[newTokenId] = TPData({
-            fecha: input.fecha,
-            alumno: input.alumno,
-            emisor: input.emisor
-        });
+        TPData storage nuevo = datos[newTokenId];
+        nuevo.fecha = fecha;
+        nuevo.alumno = alumno;
+        nuevo.emisor = emisor;
 
-        // ✅ Mint directo a la wallet destino
+        for (uint256 i = 0; i < PoF.length; i++) {
+            nuevo.PoF.push(PoFEntry({
+                id: PoF[i].id,
+                tema: PoF[i].tema
+            }));
+        }
+
         _mint(receptor, newTokenId, 1, "");
     }
 
@@ -43,31 +59,19 @@ contract TEST_POW is ERC1155, Ownable {
         returns (
             string memory fecha,
             string memory alumno,
-            address emisor
+            address emisor,
+            PoFEntry[] memory PoF
         )
     {
         TPData storage d = datos[tokenId];
-        return (d.fecha, d.alumno, d.emisor);
-    }
+        fecha = d.fecha;
+        alumno = d.alumno;
+        emisor = d.emisor;
 
-    function onERC1155Received(
-        address,
-        address,
-        uint256,
-        uint256,
-        bytes calldata
-    ) external pure returns (bytes4) {
-        return this.onERC1155Received.selector;
-    }
-
-    function onERC1155BatchReceived(
-        address,
-        address,
-        uint256[] calldata,
-        uint256[] calldata,
-        bytes calldata
-    ) external pure returns (bytes4) {
-        return this.onERC1155BatchReceived.selector;
+        PoF = new PoFEntry[](d.PoF.length);
+        for (uint256 i = 0; i < d.PoF.length; i++) {
+            PoF[i] = d.PoF[i];
+        }
     }
 
     function uri(uint256) public pure override returns (string memory) {

@@ -71,7 +71,7 @@ export const getContract = async (
 export const fetchNFTsFromWallet = async (
   wallet: string,
   provider: BrowserProvider,
-  contractAddr: string
+  contractAddr: string,
 ): Promise<NFTAsist[]> => {
   
   // const signer = await provider.getSigner()

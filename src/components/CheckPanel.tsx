@@ -8,11 +8,12 @@ interface Props {
   wallet: string
   provider: BrowserProvider
   onValid: (nfts: NFTAsist[]) => void
+  onReset?: () => void
 }
 
 const FECHA_CORTE = new Date('2025-05-28T00:00:00Z')
 
-const CheckPanel = ({ wallet, provider, onValid }: Props) => {
+const CheckPanel = ({ wallet, provider, onValid, onReset }: Props) => {
   const [loading, setLoading] = useState(false)
   const [cumpleCantidad, setCumpleCantidad] = useState(false)
   const [cumpleFechas, setCumpleFechas] = useState(false)
@@ -83,6 +84,7 @@ const CheckPanel = ({ wallet, provider, onValid }: Props) => {
             yaValidado.current = false
             walletValidado.current = null
             setForceRefresh(prev => prev + 1)
+            onReset?.() 
           }}
           className="text-sm text-blue-400 hover:text-blue-200"
         >
