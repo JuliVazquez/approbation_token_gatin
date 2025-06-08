@@ -26,11 +26,10 @@ export interface ProofOfWorkData {
   fecha: string
   alumno: string
   emisor: string
-  // PoF: {
-  //   id: number
-  //   tema: string
-  // }[]
+  ids: number[]
 }
+
+
 
 // Conexión con Metamask y obtención del provider
 export function getProvider(): BrowserProvider {
@@ -250,13 +249,9 @@ export const mintProofOfWorkNFT = async (
 ): Promise<void> => {
   console.log("🔨 Mint ProofOfWorkNFT para:", receptor, data)
   try {
-    console.log("▶️ Estructura del payload:", JSON.stringify(data, null, 2))
-    console.log("🧪 Validando types:")
-    // console.log("PoF[0].id type:", typeof data.PoF[0].id)
-    // console.log("PoF[0].tema type:", typeof data.PoF[0].tema)
-  const tx = await contract.mintAndTransferTest(receptor, data, {
-    gasLimit: 500000 // o similar
-  })
+    const tx = await contract.mintAndTransferTest(receptor, data, {
+      gasLimit: 500000
+    })
     console.log("⏳ Tx enviada:", tx.hash)
     await tx.wait()
     console.log("✅ NFT emitido y transferido correctamente")
@@ -265,4 +260,5 @@ export const mintProofOfWorkNFT = async (
     alert("Error al emitir el NFT de prueba.")
   }
 }
+
 

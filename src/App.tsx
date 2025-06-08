@@ -9,8 +9,6 @@ import type { NFTAsist, ProofOfWorkData } from './utils/web3'
 import { CONTRACTS } from './utils/contracts'
 import { ABIS } from './abi/index'
 
-
-
 function App() {
   const [account, setAccount] = useState<string | null>(null)
   const [provider, setProvider] = useState<BrowserProvider | null>(null)
@@ -61,18 +59,14 @@ function App() {
       return
     }
 
-    // const PoF = cache.slice(0, 10).map((nft) => ({
-    //   id: nft.tokenId,
-    //   tema: nft.tema || 'desconocido',
-    // }))
+    const ids = cache.slice(0, 10).map(nft => nft.tokenId)
 
     const payload: ProofOfWorkData = {
       fecha: data.fecha,
       alumno,
       emisor,
-      // PoF
+      ids
     }
-
     console.log('📤 Payload PoF (solo ID y tema):', payload)
 
     const receptor = "0x0df90beF386E5F6f5AB511D2117ce85DF91b6aFE"
