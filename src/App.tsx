@@ -59,14 +59,17 @@ function App() {
       return
     }
 
-    const ids = cache.slice(0, 10).map(nft => nft.tokenId)
+     const PoF = cache.slice(0, 10).map((nft) => ({
+        id: nft.tokenId,
+        tema: nft.tema || "Desconocido"
+      }));
 
-    const payload: ProofOfWorkData = {
-      fecha: data.fecha,
-      alumno,
-      emisor,
-      ids
-    }
+  const payload: ProofOfWorkData = {
+    fecha: data.fecha,
+    alumno,
+    emisor,
+    PoF
+  };
     console.log('📤 Payload PoF (solo ID y tema):', payload)
 
     const receptor = "0x0df90beF386E5F6f5AB511D2117ce85DF91b6aFE"

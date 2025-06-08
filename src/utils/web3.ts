@@ -23,13 +23,14 @@ interface NFTAsist {
 }
 
 export interface ProofOfWorkData {
-  fecha: string
-  alumno: string
-  emisor: string
-  ids: number[]
+  fecha: string;
+  alumno: string;
+  emisor: string;
+  PoF: {
+    id: number;
+    tema: string;
+  }[];
 }
-
-
 
 // Conexión con Metamask y obtención del provider
 export function getProvider(): BrowserProvider {
@@ -247,18 +248,21 @@ export const mintProofOfWorkNFT = async (
   receptor: string,
   data: ProofOfWorkData
 ): Promise<void> => {
-  console.log("🔨 Mint ProofOfWorkNFT para:", receptor, data)
+  console.log("🔨 Mint ProofOfWorkNFT para:", receptor, data);
   try {
-    const tx = await contract.mintAndTransferTest(receptor, data, {
-      gasLimit: 500000
-    })
-    console.log("⏳ Tx enviada:", tx.hash)
-    await tx.wait()
-    console.log("✅ NFT emitido y transferido correctamente")
+    const tx = await contract.mintAndTransferTest(
+      receptor,
+      data.fecha,
+      data.alumno,
+      data.emisor,
+      data.PoF, // 👈 ya es un array de {id, tema}, listo
+      { gasLimit: 1000000 }
+    );
+    console.log("⏳ Tx enviada:", tx.hash);
+    await tx.wait();
+    console.log("✅ NFT emitido correctamente");
   } catch (err) {
-    console.error("❌ Error al mintear:", err)
-    alert("Error al emitir el NFT de prueba.")
+    console.error("❌ Error al mintear:", err);
+    alert("Error al emitir el NFT de PoW.");
   }
-}
-
-
+};
