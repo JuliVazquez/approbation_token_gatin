@@ -6,6 +6,10 @@ import MintPanel from './components/MintPanel'
 import { connectMetamask, getContract, mintProofOfWorkNFT } from './utils/web3'
 import { BrowserProvider } from 'ethers'
 import type { NFTAsist, ProofOfWorkData } from './utils/web3'
+import { CONTRACTS } from './utils/contracts'
+import { ABIS } from './abi/index'
+
+
 
 function App() {
   const [account, setAccount] = useState<string | null>(null)
@@ -14,13 +18,6 @@ function App() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const nftCacheRef = useRef<NFTAsist[] | null>(null)
   
-  const [formData, setFormData] = useState<null | {
-    nombre: string
-    apellido: string
-    fecha: string
-    alumno: string
-  }>(null)
-
   const connectWallet = async () => {
     try {
       const { account, provider } = await connectMetamask()
@@ -28,7 +25,6 @@ function App() {
       setProvider(provider)
       setValidado(false)
       setMostrarFormulario(false)
-      setFormData(null)
       nftCacheRef.current = null
     } catch (error) {
       alert('No se pudo conectar con Metamask')
@@ -41,7 +37,6 @@ function App() {
     setProvider(null)
     setValidado(false)
     setMostrarFormulario(false)
-    setFormData(null)
     nftCacheRef.current = null
   }
 
@@ -66,24 +61,24 @@ function App() {
       return
     }
 
-    const PoF = cache.slice(0, 10).map((nft) => ({
-      id: nft.tokenId,
-      tema: nft.tema || 'desconocido',
-    }))
+    // const PoF = cache.slice(0, 10).map((nft) => ({
+    //   id: nft.tokenId,
+    //   tema: nft.tema || 'desconocido',
+    // }))
 
     const payload: ProofOfWorkData = {
       fecha: data.fecha,
       alumno,
       emisor,
-      PoF
+      // PoF
     }
 
     console.log('📤 Payload PoF (solo ID y tema):', payload)
 
-    const contract = await getContract(provider)
-    await mintProofOfWorkNFT(contract, payload)
-
-    setFormData({ ...data, alumno })
+    const receptor = "0x0df90beF386E5F6f5AB511D2117ce85DF91b6aFE"
+    const contract = await getContract(provider, CONTRACTS.TPNFT_TEST, ABIS.POW_TEST)
+    await mintProofOfWorkNFT(contract, receptor, payload)
+    await mintProofOfWorkNFT(contract, receptor, payload) // 2da emisión simulada
   }
 
   return (

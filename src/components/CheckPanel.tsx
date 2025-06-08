@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { BrowserProvider } from 'ethers'
 import { fetchNFTsFromWallet } from '../utils/web3'
 import type { NFTAsist } from '../utils/web3'
+import { CONTRACTS } from '../utils/contracts'
 
 interface Props {
   wallet: string
@@ -36,7 +37,7 @@ const CheckPanel = ({ wallet, provider, onValid }: Props) => {
 
       try {
         console.log('🚀 Ejecutando fetchNFTsFromWallet')
-        const nfts = await fetchNFTsFromWallet(wallet, provider)
+        const nfts = await fetchNFTsFromWallet(wallet, provider, CONTRACTS.CLASS_NFT)
 
         const cumpleCantidad = nfts.length >= 10
         const cumpleFechas = nfts.every(nft => nft.fecha && nft.fecha < FECHA_CORTE)

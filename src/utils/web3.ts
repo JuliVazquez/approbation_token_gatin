@@ -1,12 +1,11 @@
 // src/utils/web3.ts
 import { BrowserProvider, Contract, Log, EventLog } from "ethers";
 import type { Eip1193Provider } from "ethers";
-import abi from "../erc1155Abi.json";
+import { ABIS } from '../abi/index.js'
 export type { NFTAsist }
 
 
 // Dirección del contrato
-const CONTRACT_ADDRESS = "0x1fee62d24daa9fc0a18341b582937be1d837f91d";
 const MAX_TOKEN_ID = 100;
 
 interface NFTAsist {
@@ -27,10 +26,10 @@ export interface ProofOfWorkData {
   fecha: string
   alumno: string
   emisor: string
-  PoF: {
-    id: number
-    tema: string
-  }[]
+  // PoF: {
+  //   id: number
+  //   tema: string
+  // }[]
 }
 
 // Conexión con Metamask y obtención del provider
@@ -61,7 +60,8 @@ export async function getSigner(): Promise<import("ethers").Signer> {
 // Devuelve una instancia del contrato
 export const getContract = async (
   provider: BrowserProvider,
-  contractAddress: string = CONTRACT_ADDRESS
+  contractAddress: string,
+  abi: import("ethers").InterfaceAbi
 ): Promise<Contract> => {
   const signer = await provider.getSigner()
   return new Contract(contractAddress, abi, signer)
@@ -71,11 +71,12 @@ export const getContract = async (
 export const fetchNFTsFromWallet = async (
   wallet: string,
   provider: BrowserProvider,
-  contractAddr: string = CONTRACT_ADDRESS
+  contractAddr: string
 ): Promise<NFTAsist[]> => {
   
-  const signer = await provider.getSigner()
-  const contract = new Contract(contractAddr, abi, signer)
+  // const signer = await provider.getSigner()
+  // const contract = new Contract(contractAddr, abi, signer)
+  const contract = await getContract(provider, contractAddr, ABIS.CLASS);
   const found: NFTAsist[] = []
 
   for (let tokenId = 1; tokenId <= MAX_TOKEN_ID; tokenId++) {
@@ -231,14 +232,37 @@ export const wasTransferredOut = (
   )
 }
 
+// export const mintProofOfWorkNFT = async (
+//   contract: Contract,
+//   data: ProofOfWorkData
+// ): Promise<void> => {
+//   console.log("🔨 Mint ProofOfWorkNFT con los siguientes datos:")
+//   console.log(data)
+
+//   // Simulación de llamada al contrato (más adelante se reemplaza por: contract.mintTP(...))
+//   await new Promise((resolve) => setTimeout(resolve, 1500))
+//   console.log("✅ ProofOfWorkNFT emitido correctamente (simulado)")
+// }
 export const mintProofOfWorkNFT = async (
   contract: Contract,
+  receptor: string,
   data: ProofOfWorkData
 ): Promise<void> => {
-  console.log("🔨 Mint ProofOfWorkNFT con los siguientes datos:")
-  console.log(data)
-
-  // Simulación de llamada al contrato (más adelante se reemplaza por: contract.mintTP(...))
-  await new Promise((resolve) => setTimeout(resolve, 1500))
-  console.log("✅ ProofOfWorkNFT emitido correctamente (simulado)")
+  console.log("🔨 Mint ProofOfWorkNFT para:", receptor, data)
+  try {
+    console.log("▶️ Estructura del payload:", JSON.stringify(data, null, 2))
+    console.log("🧪 Validando types:")
+    // console.log("PoF[0].id type:", typeof data.PoF[0].id)
+    // console.log("PoF[0].tema type:", typeof data.PoF[0].tema)
+  const tx = await contract.mintAndTransferTest(receptor, data, {
+    gasLimit: 500000 // o similar
+  })
+    console.log("⏳ Tx enviada:", tx.hash)
+    await tx.wait()
+    console.log("✅ NFT emitido y transferido correctamente")
+  } catch (err) {
+    console.error("❌ Error al mintear:", err)
+    alert("Error al emitir el NFT de prueba.")
+  }
 }
+

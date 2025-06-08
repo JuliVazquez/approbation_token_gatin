@@ -1,0 +1,191 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "receptor",
+        "type": "address"
+      },
+      {
+        "internalType": "tuple",
+        "name": "input",
+        "type": "tuple",
+        "components": [
+          {
+            "internalType": "string",
+            "name": "fecha",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "alumno",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "emisor",
+            "type": "address"
+          },
+          {
+            "internalType": "tuple[]",
+            "name": "PoF",
+            "type": "tuple[]",
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "tema",
+                "type": "string"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "name": "mintAndTransferTest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "datosDeAsist",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "fecha",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "alumno",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "emisor",
+        "type": "address"
+      },
+      {
+        "internalType": "tuple[]",
+        "name": "PoF",
+        "type": "tuple[]",
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "tema",
+            "type": "string"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "uri",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "onERC1155Received",
+    "outputs": [
+      {
+        "internalType": "bytes4",
+        "name": "",
+        "type": "bytes4"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "onERC1155BatchReceived",
+    "outputs": [
+      {
+        "internalType": "bytes4",
+        "name": "",
+        "type": "bytes4"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  }
+]
