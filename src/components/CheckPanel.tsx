@@ -13,45 +13,40 @@ interface Props {
 const FECHA_CORTE = new Date('2025-05-28T00:00:00Z')
 
 const CheckPanel = ({ wallet, provider, onValid }: Props) => {
-  const [nftCountOK, setNftCountOK] = useState(false)
-  const [fechaOK, setFechaOK] = useState(false)
-  const [sinTransferencias, setSinTransferencias] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [cumpleCantidad, setCumpleCantidad] = useState(false)
+  const [cumpleFechas, setCumpleFechas] = useState(false)
+  const [sinMovimientos, setSinMovimientos] = useState(false)
   const [forceRefresh, setForceRefresh] = useState(0)
 
   const yaValidado = useRef(false)
   const walletValidado = useRef<string | null>(null)
 
   useEffect(() => {
-    console.log("🔁 Ejecutando useEffect de CheckPanel")
-
     if (!wallet || !provider) return
     if (yaValidado.current && walletValidado.current === wallet && forceRefresh === 0) return
 
     const validar = async () => {
-      // Limpieza previa
       setLoading(true)
-      setNftCountOK(false)
-      setFechaOK(false)
-      setSinTransferencias(false)
+      setCumpleCantidad(false)
+      setCumpleFechas(false)
+      setSinMovimientos(false)
 
       try {
-        console.log('🚀 Ejecutando fetchNFTsFromWallet')
         const nfts = await fetchNFTsFromWallet(wallet, provider, CONTRACTS.CLASS_NFT)
 
-        const cumpleCantidad = nfts.length >= 10
-        const cumpleFechas = nfts.every(nft => nft.fecha && nft.fecha < FECHA_CORTE)
-        const sinMovimientos = nfts.every(nft => !nft.fueTransferido)
+        const cumpleA = nfts.length >= 10
+        const cumpleB = nfts.every(nft => nft.fecha && nft.fecha < FECHA_CORTE)
+        const cumpleC = nfts.every(nft => !nft.fueTransferido)
 
-        setNftCountOK(cumpleCantidad)
-        setFechaOK(cumpleFechas)
-        setSinTransferencias(sinMovimientos)
+        setCumpleCantidad(cumpleA)
+        setCumpleFechas(cumpleB)
+        setSinMovimientos(cumpleC)
 
-        if (cumpleCantidad && cumpleFechas && sinMovimientos) {
-          console.log('✔️ Habilitado para emitir NFT-TP')
+        if (cumpleA && cumpleB && cumpleC) {
           yaValidado.current = true
-          walletValidado.current = wallet;
-          onValid(nfts) 
+          walletValidado.current = wallet
+          onValid(nfts)
         }
       } catch (error) {
         console.error('Error al validar NFTs:', error)
@@ -62,6 +57,22 @@ const CheckPanel = ({ wallet, provider, onValid }: Props) => {
 
     validar()
   }, [wallet, provider, onValid, forceRefresh])
+
+  const renderEstado = (ok: boolean, texto: string) => {
+    return (
+      <li className={`flex items-center space-x-2 ${ok ? 'text-green-400' : 'text-red-400'}`}>
+        {loading && !ok ? (
+          <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+        ) : (
+          <span>{ok ? '✔' : '✘'}</span>
+        )}
+        <span>{texto}</span>
+      </li>
+    )
+  }
 
   return (
     <div className="p-4 border rounded bg-neutral-900 text-white w-full">
@@ -78,21 +89,12 @@ const CheckPanel = ({ wallet, provider, onValid }: Props) => {
           🔄 Actualizar validación
         </button>
       </div>
-      {loading ? (
-        <p className="text-gray-400">Cargando NFTs y eventos...</p>
-      ) : (
-        <ul className="list-disc ml-6 text-sm space-y-1">
-          <li className={nftCountOK ? 'text-green-400' : 'text-red-400'}>
-            A. Posee al menos 10 NFTs del contrato: {nftCountOK ? '✔' : '✘'}
-          </li>
-          <li className={fechaOK ? 'text-green-400' : 'text-red-400'}>
-            B. Todos fueron minteados antes del 28/05/2025: {fechaOK ? '✔' : '✘'}
-          </li>
-          <li className={sinTransferencias ? 'text-green-400' : 'text-red-400'}>
-            C. Ningún NFT fue transferido luego de recibido: {sinTransferencias ? '✔' : '✘'}
-          </li>
-        </ul>
-      )}
+
+      <ul className="list-disc ml-6 text-sm space-y-1">
+        {renderEstado(cumpleCantidad, 'Posee al menos 10 NFTs del contrato')}
+        {renderEstado(cumpleFechas, 'Todos fueron minteados antes del 28/05/2025')}
+        {renderEstado(sinMovimientos, 'Ningún NFT fue transferido luego de recibido')}
+      </ul>
     </div>
   )
 }

@@ -9,6 +9,7 @@ import type { NFTAsist, ProofOfWorkData } from './utils/web3'
 import { CONTRACTS } from './utils/contracts'
 import { ABIS } from './abi/index'
 
+
 function App() {
   const [account, setAccount] = useState<string | null>(null)
   const [provider, setProvider] = useState<BrowserProvider | null>(null)
