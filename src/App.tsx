@@ -33,7 +33,7 @@ const connectWallet = async () => {
     setAccount(account)
     setProvider(provider)
 
-    const esProfe = account.toLowerCase() === WALLETS.TEST_WALLET.toLowerCase()
+    const esProfe = [WALLETS.TEST_WALLET_1.toLowerCase(),WALLETS.TEST_WALLET_2.toLowerCase()].includes(account.toLowerCase())
     setEsProfesor(esProfe)
 
     setValidado(false)
@@ -93,26 +93,29 @@ const connectWallet = async () => {
     console.log('📤 Payload PoF (solo ID y tema):', payload)
 
     setLoadingMint(true)
-    try {
-      const receptor = "0x0df90beF386E5F6f5AB511D2117ce85DF91b6aFE"
-      const contract = await getContract(provider, CONTRACTS.TPNFT_TEST, ABIS.POW_TEST)
-      const txResult = await mintProofOfWorkNFT(contract, receptor, payload)
-      if (txResult) {
-        setToast({
-          visible: true,
-          message: `✅ NFT emitido exitosamente.`,
-          hash: txResult.hash
-        })
+    const contract = await getContract(provider, CONTRACTS.POW_NFT, ABIS.POW_TEST)
+    const receptores = [WALLETS.TEST_WALLET_1, WALLETS.TEST_WALLET_2]
+
+    for (const receptor of receptores) {
+      try {
+        const txResult = await mintProofOfWorkNFT(contract, receptor, payload)
+        if (txResult) {
+          setToast({
+            visible: true,
+            message: `✅ NFT emitido exitosamente a ${receptor}`,
+            hash: txResult.hash
+          })
+        }
+      } catch (error) {
+        console.error(`❌ Error al mintear para ${receptor}:`, error)
+        alert(`Error al mintear el NFT para ${receptor}`)
       }
-    } catch (error) {
-      console.error('❌ Error al mintear:', error)
-      alert('Ocurrió un error al mintear el NFT.')
-    } finally {
-      setLoadingMint(false)
     }
+
+    setLoadingMint(false)
   }
 
-return (
+  return (
   <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center">
     {!esProfesor && (
       <Header account={account} onConnect={connectWallet} onDisconnect={disconnectWallet} />

@@ -233,17 +233,6 @@ export const wasTransferredOut = (
   )
 }
 
-// export const mintProofOfWorkNFT = async (
-//   contract: Contract,
-//   data: ProofOfWorkData
-// ): Promise<void> => {
-//   console.log("🔨 Mint ProofOfWorkNFT con los siguientes datos:")
-//   console.log(data)
-
-//   // Simulación de llamada al contrato (más adelante se reemplaza por: contract.mintTP(...))
-//   await new Promise((resolve) => setTimeout(resolve, 1500))
-//   console.log("✅ ProofOfWorkNFT emitido correctamente (simulado)")
-// }
 export const mintProofOfWorkNFT = async (
   contract: Contract,
   receptor: string,
@@ -251,7 +240,7 @@ export const mintProofOfWorkNFT = async (
 ): Promise<{ hash: string } | null> => {
   console.log("🔨 Mint ProofOfWorkNFT para:", receptor, data);
   try {
-    const tx = await contract.mintAndTransferTest(
+    const tx = await contract.mintAndTransfer(
       receptor,
       data.fecha,
       data.alumno,

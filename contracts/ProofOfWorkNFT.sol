@@ -3,9 +3,10 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract TEST_POW is ERC1155, Ownable {
+contract ProofOfWorkNFT is ERC1155, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
@@ -25,7 +26,7 @@ contract TEST_POW is ERC1155, Ownable {
 
     constructor(string memory uri_) ERC1155(uri_) Ownable(msg.sender) {}
 
-    function mintAndTransferTest(
+    function mintAndTransfer(
         address receptor,
         string calldata fecha,
         string calldata alumno,
@@ -53,7 +54,7 @@ contract TEST_POW is ERC1155, Ownable {
         _mint(receptor, newTokenId, 1, "");
     }
 
-    function datosDeAsist(uint256 tokenId)
+    function getProofOfWork(uint256 tokenId)
         public
         view
         returns (
@@ -76,5 +77,16 @@ contract TEST_POW is ERC1155, Ownable {
 
     function uri(uint256) public pure override returns (string memory) {
         return "ipfs://bafkreibimlves3n72f6ve4grqarekjp6smfbeak5jxq7c66psil5jvtt44";
+    }
+
+    // ✅ Agregado: para asegurar compatibilidad total con nodos y ethers.js
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }

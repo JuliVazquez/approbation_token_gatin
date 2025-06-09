@@ -10,12 +10,12 @@
           { "internalType": "uint256", "name": "id", "type": "uint256" },
           { "internalType": "string", "name": "tema", "type": "string" }
         ],
-        "internalType": "struct TEST_POW.PoFEntry[]",
+        "internalType": "struct ProofOfWorkNFT.PoFEntry[]",
         "name": "PoF",
         "type": "tuple[]"
       }
     ],
-    "name": "mintAndTransferTest",
+    "name": "mintAndTransfer",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -24,7 +24,7 @@
     "inputs": [
       { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
     ],
-    "name": "datosDeAsist",
+    "name": "getProofOfWork",
     "outputs": [
       { "internalType": "string", "name": "fecha", "type": "string" },
       { "internalType": "string", "name": "alumno", "type": "string" },
@@ -34,7 +34,7 @@
           { "internalType": "uint256", "name": "id", "type": "uint256" },
           { "internalType": "string", "name": "tema", "type": "string" }
         ],
-        "internalType": "struct TEST_POW.PoFEntry[]",
+        "internalType": "struct ProofOfWorkNFT.PoFEntry[]",
         "name": "PoF",
         "type": "tuple[]"
       }
@@ -43,13 +43,9 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "name": "uri",
-    "outputs": [
-      { "internalType": "string", "name": "", "type": "string" }
-    ],
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
     "stateMutability": "pure",
     "type": "function"
   },
@@ -59,9 +55,14 @@
       { "internalType": "uint256", "name": "id", "type": "uint256" }
     ],
     "name": "balanceOf",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes4", "name": "interfaceId", "type": "bytes4" }],
+    "name": "supportsInterface",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
     "stateMutability": "view",
     "type": "function"
   }

@@ -28,14 +28,14 @@ const ProofStatusPanel = ({ wallet, provider }: Props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const contract = await getContract(provider, CONTRACTS.TPNFT_TEST, ABIS.POW_TEST)
+        const contract = await getContract(provider, CONTRACTS.POW_NFT, ABIS.POW_TEST)
 
         for (let tokenId = 1; tokenId <= 100; tokenId++) {
           const balance: bigint = await contract.balanceOf(wallet, tokenId)
           console.log(`🔍 Checking token ${tokenId} - Balance: ${balance}`)
 
           if (balance > 0n) {
-            const datos = await contract.datosDeAsist(tokenId)
+            const datos = await contract.getProofOfWork(tokenId)
             console.log(`📦 Datos obtenidos para token ${tokenId}:`, datos)
 
             const uri = await contract.uri(0)
