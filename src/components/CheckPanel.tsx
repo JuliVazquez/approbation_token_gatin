@@ -37,8 +37,8 @@ const CheckPanel = ({ wallet, provider, onValid, onReset }: Props) => {
         const nfts = await fetchNFTsFromWallet(wallet, provider, CONTRACTS.CLASS_NFT)
 
         const cumpleA = nfts.length >= 10
-        const cumpleB = nfts.every(nft => nft.fecha && nft.fecha < FECHA_CORTE)
-        const cumpleC = nfts.every(nft => !nft.fueTransferido)
+        const cumpleB = nfts.length > 0 && nfts.every(nft => nft.fecha && nft.fecha < FECHA_CORTE)
+        const cumpleC = nfts.length > 0 && nfts.every(nft => !nft.fueTransferido)
 
         setCumpleCantidad(cumpleA)
         setCumpleFechas(cumpleB)
