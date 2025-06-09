@@ -4,9 +4,10 @@ import { useState } from 'react'
 interface Props {
   onSubmit: (data: { nombre: string; apellido: string; fecha: string; alumno: string }) => void
   onCancel?: () => void
+  loading?: boolean
 }
 
-const MintPanel = ({ onSubmit, onCancel }: Props) => {
+const MintPanel = ({ onSubmit, onCancel, loading }: Props) => {
   const [nombre, setNombre] = useState('')
   const [apellido, setApellido] = useState('')
   const [fecha, setFecha] = useState('')
@@ -62,10 +63,19 @@ const MintPanel = ({ onSubmit, onCancel }: Props) => {
         </div>
         <button
           type="submit"
-          className="w-full bg-emerald-600 hover:bg-emerald-700 py-2 rounded font-semibold"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 py-2 rounded font-semibold flex items-center justify-center disabled:opacity-50"
+          disabled={loading}
         >
-          Confirmar y mintear
+          {loading ? (
+            <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            </svg>
+          ) : (
+            'Confirmar y mintear'
+          )}
         </button>
+
       </form>
     </div>
   )

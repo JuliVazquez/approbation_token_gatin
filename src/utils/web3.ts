@@ -247,7 +247,7 @@ export const mintProofOfWorkNFT = async (
   contract: Contract,
   receptor: string,
   data: ProofOfWorkData
-): Promise<void> => {
+): Promise<{ hash: string } | null> => {
   console.log("🔨 Mint ProofOfWorkNFT para:", receptor, data);
   try {
     const tx = await contract.mintAndTransferTest(
@@ -255,14 +255,17 @@ export const mintProofOfWorkNFT = async (
       data.fecha,
       data.alumno,
       data.emisor,
-      data.PoF, // 👈 ya es un array de {id, tema}, listo
+      data.PoF,
       { gasLimit: 1000000 }
     );
     console.log("⏳ Tx enviada:", tx.hash);
     await tx.wait();
     console.log("✅ NFT emitido correctamente");
+    return { hash: tx.hash };
   } catch (err) {
     console.error("❌ Error al mintear:", err);
     alert("Error al emitir el NFT de PoW.");
+    return null;
   }
 };
+
