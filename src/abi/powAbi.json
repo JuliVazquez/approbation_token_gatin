@@ -1,38 +1,14 @@
 [
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "receptor",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "fecha",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "alumno",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "emisor",
-        "type": "address"
-      },
+      { "internalType": "address", "name": "receptor", "type": "address" },
+      { "internalType": "string", "name": "fecha", "type": "string" },
+      { "internalType": "string", "name": "alumno", "type": "string" },
+      { "internalType": "address", "name": "emisor", "type": "address" },
       {
         "components": [
-          {
-            "internalType": "uint256",
-            "name": "id",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "tema",
-            "type": "string"
-          }
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "string", "name": "tema", "type": "string" }
         ],
         "internalType": "struct TEST_POW.PoFEntry[]",
         "name": "PoF",
@@ -46,41 +22,17 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
+      { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
     ],
     "name": "datosDeAsist",
     "outputs": [
-      {
-        "internalType": "string",
-        "name": "fecha",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "alumno",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "emisor",
-        "type": "address"
-      },
+      { "internalType": "string", "name": "fecha", "type": "string" },
+      { "internalType": "string", "name": "alumno", "type": "string" },
+      { "internalType": "address", "name": "emisor", "type": "address" },
       {
         "components": [
-          {
-            "internalType": "uint256",
-            "name": "id",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "tema",
-            "type": "string"
-          }
+          { "internalType": "uint256", "name": "id", "type": "uint256" },
+          { "internalType": "string", "name": "tema", "type": "string" }
         ],
         "internalType": "struct TEST_POW.PoFEntry[]",
         "name": "PoF",
@@ -94,13 +46,21 @@
     "inputs": [],
     "name": "uri",
     "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
+      { "internalType": "string", "name": "", "type": "string" }
     ],
     "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "account", "type": "address" },
+      { "internalType": "uint256", "name": "id", "type": "uint256" }
+    ],
+    "name": "balanceOf",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]

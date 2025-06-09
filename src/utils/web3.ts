@@ -23,6 +23,7 @@ interface NFTAsist {
 }
 
 export interface ProofOfWorkData {
+  id?: number; // opcional para el mint
   fecha: string;
   alumno: string;
   emisor: string;

@@ -1,0 +1,5 @@
+export const WALLETS = {
+  TEST_WALLET: "0x0df90beF386E5F6f5AB511D2117ce85DF91b6aFE",
+
+}
+
