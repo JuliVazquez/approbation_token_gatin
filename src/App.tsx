@@ -16,8 +16,11 @@ function App() {
   const [validado, setValidado] = useState(false)
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const [mostrarNFTs, setMostrarNFTs] = useState(false)
-  const [toast, setToast] = useState<{ visible: boolean; message: string }>({ visible: false, message: '' })
   const [loadingMint, setLoadingMint] = useState(false)
+  const [toast, setToast] = useState<{ visible: boolean; message: string; hash?: string }>({
+    visible: false,
+    message: ''
+  })
 
   const nftCacheRef = useRef<NFTAsist[] | null>(null)
 
@@ -70,14 +73,14 @@ function App() {
 
     const PoF = cache.slice(0, 10).map((nft) => ({
       id: nft.tokenId,
-      tema: nft.tema || 'Desconocido',
+      tema: nft.tema || 'Desconocido'
     }))
 
     const payload: ProofOfWorkData = {
       fecha: data.fecha,
       alumno,
       emisor,
-      PoF,
+      PoF
     }
 
     console.log('📤 Payload PoF (solo ID y tema):', payload)
@@ -90,7 +93,8 @@ function App() {
       if (txResult) {
         setToast({
           visible: true,
-          message: `✅ NFT emitido exitosamente.\nHash: ${txResult.hash}`
+          message: `✅ NFT emitido exitosamente.`,
+          hash: txResult.hash
         })
       }
     } catch (error) {
@@ -163,7 +167,8 @@ function App() {
             {toast.visible && (
               <Toast
                 message={toast.message}
-                onClose={() => setToast({ visible: false, message: '' })}
+                hash={toast.hash}
+                onClose={() => setToast({ visible: false, message: '', hash: undefined })}
               />
             )}
           </>
