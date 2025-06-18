@@ -29,7 +29,7 @@ export interface ProofOfWorkData {
   emisor: string;
   PoF: {
     id: number;
-    tema: string;
+    contractAddress: string; // <- ¡AGREGAR ESTE CAMPO!
   }[];
 }
 

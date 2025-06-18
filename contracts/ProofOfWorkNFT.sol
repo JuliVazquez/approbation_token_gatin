@@ -12,7 +12,8 @@ contract ProofOfWorkNFT is ERC1155, Ownable {
 
     struct PoFEntry {
         uint256 id;
-        string tema;
+        //string tema;
+        address  contractAddress; // ← NOTA: se mantiene como string para evitar conflictos en front-end con address[]
     }
 
     struct TPData {
@@ -28,11 +29,12 @@ contract ProofOfWorkNFT is ERC1155, Ownable {
 
     function mintAndTransfer(
         address receptor,
-        string calldata fecha,
-        string calldata alumno,
+        string memory fecha,
+        string memory alumno,
         address emisor,
-        PoFEntry[] calldata PoF
+        PoFEntry[] memory PoF
     ) external {
+        require(PoF.length == 10, "Se requieren exactamente 10 PoFs");
         require(bytes(alumno).length > 0, "Alumno requerido");
         require(emisor == msg.sender, "Solo el alumno puede emitir");
 
@@ -47,7 +49,8 @@ contract ProofOfWorkNFT is ERC1155, Ownable {
         for (uint256 i = 0; i < PoF.length; i++) {
             nuevo.PoF.push(PoFEntry({
                 id: PoF[i].id,
-                tema: PoF[i].tema
+                //tema: PoF[i].tema,
+                contractAddress: PoF[i].contractAddress
             }));
         }
 
@@ -79,7 +82,6 @@ contract ProofOfWorkNFT is ERC1155, Ownable {
         return "ipfs://bafkreibimlves3n72f6ve4grqarekjp6smfbeak5jxq7c66psil5jvtt44";
     }
 
-    // ✅ Agregado: para asegurar compatibilidad total con nodos y ethers.js
     function supportsInterface(bytes4 interfaceId)
         public
         view

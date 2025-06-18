@@ -80,8 +80,10 @@ const connectWallet = async () => {
 
     const PoF = cache.slice(0, 10).map((nft) => ({
       id: nft.tokenId,
-      tema: nft.tema || 'Desconocido'
+      // tema: nft.tema || 'Desconocido',
+      contractAddress: CONTRACTS.CLASS_NFT
     }))
+
 
     const payload: ProofOfWorkData = {
       fecha: data.fecha,
