@@ -240,12 +240,20 @@ export const mintProofOfWorkNFT = async (
 ): Promise<{ hash: string } | null> => {
   console.log("🔨 Mint ProofOfWorkNFT para:", receptor, data);
   try {
+
+    const alteredPoF = [...data.PoF];
+    alteredPoF[0] = {
+      ...alteredPoF[0],
+      id: 999999  // Un ID que el emisor no posee
+    };
+
     const tx = await contract.mintAndTransfer(
       receptor,
       data.fecha,
       data.alumno,
       data.emisor,
       data.PoF,
+      // alteredPoF,
       { gasLimit: 1000000 }
     );
     console.log("⏳ Tx enviada:", tx.hash);
