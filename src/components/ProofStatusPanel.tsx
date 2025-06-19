@@ -29,7 +29,10 @@ const ProofStatusPanel = ({ wallet, provider }: Props) => {
     const fetchData = async () => {
       try {
         const contract = await getContract(provider, CONTRACTS.POW_NFT, ABIS.POW_TEST)
+        console.log('🔗 Conectando al contrato ProofOfWorkNFT:', contract.adress)
+        console.log('👤 Wallet conectada:', wallet
 
+        )
         for (let tokenId = 1; tokenId <= 100; tokenId++) {
           const balance: bigint = await contract.balanceOf(wallet, tokenId)
           console.log(`🔍 Checking token ${tokenId} - Balance: ${balance}`)
@@ -85,7 +88,7 @@ const ProofStatusPanel = ({ wallet, provider }: Props) => {
           <strong>Pruebas de trabajo (PoF):</strong>
           <ul className="ml-6 list-disc text-sm mt-1">
             {asistData.PoF.map((item) => (
-              <li key={item.id}>ID {item.id} – {item.tema}</li>
+              <li key={item.id}>ID {item.id} – {item.contractAddress}</li>
             ))}
           </ul>
         </div>
