@@ -33,6 +33,26 @@ export interface ProofOfWorkData {
   }[];
 }
 
+export interface AsistDataExt {
+  tokenId: number
+  fecha: string
+  alumno: string
+  emisor: string
+  metadata: {
+    name: string
+    description: string
+    image: string
+  }
+  PoF: {
+    id: number
+    contractAddress: string
+    tema?: string
+    clase?: number
+  }[]
+}
+
+
+
 // Conexión con Metamask y obtención del provider
 export function getProvider(): BrowserProvider {
   const ethProvider = (window as Window & { ethereum?: Eip1193Provider }).ethereum;
@@ -267,3 +287,53 @@ export const mintProofOfWorkNFT = async (
   }
 };
 
+// Función principal para buscar el ProofOfWorkNFT
+export const getProofOfWorkNFTForWallet = async (
+  wallet: string,
+  provider: BrowserProvider,
+  contractAddress: string
+): Promise<AsistDataExt | null> => {
+  const powContract = new Contract(contractAddress, ABIS.POW_TEST, provider)
+
+  for (let tokenId = 1; tokenId <= 100; tokenId++) {
+    const balance = await powContract.balanceOf(wallet, tokenId)
+    if (balance > 0n) {
+      const data = await powContract.getProofOfWork(tokenId)
+      const uri = await powContract.uri(0)
+      const metadataUrl = uri.replace('ipfs://', 'https://ipfs.io/ipfs/')
+      const metadata = await fetch(metadataUrl).then((res) => res.json())
+
+      const detailedPoF = await Promise.all(
+        data.PoF.map(async (entry: { id: bigint; contractAddress: string }) => {
+          const asistenciaContract = new Contract(entry.contractAddress, ABIS.CLASS, provider)
+          try {
+            const claseData = await asistenciaContract.datosDeClases(entry.id)
+            return {
+              id: Number(entry.id),
+              contractAddress: entry.contractAddress,
+              clase: Number(claseData.clase),
+              tema: claseData.tema
+            }
+          } catch (error) {
+            console.warn(`⚠️ No se pudo leer clase/tema para PoF ID ${entry.id}:`, error)
+            return {
+              id: Number(entry.id),
+              contractAddress: entry.contractAddress
+            }
+          }
+        })
+      )
+
+      return {
+        tokenId,
+        fecha: data.fecha,
+        alumno: data.alumno,
+        emisor: data.emisor,
+        PoF: detailedPoF,
+        metadata
+      }
+    }
+  }
+
+  return null
+}
