@@ -9,7 +9,6 @@ import { CONTRACTS } from './utils/contracts'
 import { WALLETS } from './utils/wallets'
 import { ABIS } from './abi/index'
 import NFTListPanel from './components/NFTListaPanel'
-import Toast from './components/Toast'
 import ProofStatusPanel from './components/ProofStatusPanel'
 
 function App() {
@@ -21,10 +20,7 @@ function App() {
   const [mostrarNFTs, setMostrarNFTs] = useState(false)
   const [loadingMint, setLoadingMint] = useState(false)
   const [disableMintButton, setDisableMintButton] = useState(true)
-  const [toast, setToast] = useState<{ visible: boolean; message: string; hash?: string }>({
-    visible: false,
-    message: ''
-  })
+  const [mintSuccess, setMintSuccess] = useState(false)
 
   const nftCacheRef = useRef<NFTAsist[] | null>(null)
 
@@ -40,7 +36,7 @@ function App() {
       setValidado(false)
       setMostrarFormulario(false)
       setMostrarNFTs(false)
-      setToast({ visible: false, message: '' })
+      setMintSuccess(false)
       nftCacheRef.current = null
     } catch (error) {
       alert('No se pudo conectar con Metamask')
@@ -54,7 +50,7 @@ function App() {
     setValidado(false)
     setMostrarFormulario(false)
     setMostrarNFTs(false)
-    setToast({ visible: false, message: '' })
+    setMintSuccess(false)
     nftCacheRef.current = null
   }
 
@@ -71,9 +67,8 @@ function App() {
 
     const alumno = `${data.nombre} ${data.apellido}`
     const emisor = account
-
     const cache = nftCacheRef.current
-    console.log('🔍 Verificando NFTs en caché:', cache)
+
     if (!cache || cache.length < 10) {
       alert('Error: No se encontraron los 10 NFTs base.')
       return
@@ -91,22 +86,13 @@ function App() {
       PoF
     }
 
-    console.log('📤 Payload PoF (solo ID y tema):', payload)
-
     setLoadingMint(true)
     const contract = await getContract(provider, CONTRACTS.POW_NFT, ABIS.POW_TEST)
     const receptores = [WALLETS.TEST_WALLET_1, WALLETS.TEST_WALLET_2]
 
     for (const receptor of receptores) {
       try {
-        const txResult = await mintProofOfWorkNFT(contract, receptor, payload)
-        if (txResult) {
-          setToast({
-            visible: true,
-            message: `✅ NFT emitido exitosamente a ${receptor}`,
-            hash: txResult.hash
-          })
-        }
+        await mintProofOfWorkNFT(contract, receptor, payload)
       } catch (error) {
         console.error(`❌ Error al mintear para ${receptor}:`, error)
         alert(`Error al mintear el NFT para ${receptor}`)
@@ -114,6 +100,8 @@ function App() {
     }
 
     setLoadingMint(false)
+    setMostrarFormulario(false)
+    setMintSuccess(true)
   }
 
   return (
@@ -135,18 +123,20 @@ function App() {
               wallet={account}
               provider={provider}
               onValid={(nfts) => {
-              if (!nftCacheRef.current || nftCacheRef.current.length === 0) {
-                setValidado(true)
-                setDisableMintButton(false)
-                setMostrarFormulario(false)
-                nftCacheRef.current = nfts
-                setMostrarNFTs(true)
-              }
-            }}
+                if (!nftCacheRef.current || nftCacheRef.current.length === 0) {
+                  setValidado(true)
+                  setDisableMintButton(false)
+                  setMostrarFormulario(false)
+                  setMintSuccess(false)
+                  nftCacheRef.current = nfts
+                  setMostrarNFTs(true)
+                }
+              }}
               onReset={() => {
                 setMostrarNFTs(false)
                 nftCacheRef.current = null
                 setDisableMintButton(true)
+                setMintSuccess(false)
               }}
             />
 
@@ -155,12 +145,15 @@ function App() {
                 <div className="bg-red-800 text-white p-4 rounded-lg shadow-md">
                   <p className="text-md font-semibold">Aún no cumple los requisitos para aprobar.</p>
                 </div>
+              ) : mintSuccess ? (
+                <div className="bg-green-800 text-white p-4 rounded-lg shadow-md">
+                  <p className="text-md font-semibold">✅ NFT de ProofOfWork emitidos y minteados exitosamente</p>
+                </div>
               ) : (
                 <button
                   className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold"
                   onClick={() => {
                     setMostrarNFTs(false)
-                    setToast({ visible: false, message: '' })
                     setMostrarFormulario(true)
                   }}
                 >
@@ -190,14 +183,6 @@ function App() {
               />
             )}
           </>
-        )}
-
-        {toast.visible && (
-          <Toast
-            message={toast.message}
-            hash={toast.hash}
-            onClose={() => setToast({ visible: false, message: '', hash: undefined })}
-          />
         )}
       </main>
     </div>
