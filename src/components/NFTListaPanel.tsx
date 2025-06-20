@@ -15,8 +15,14 @@ const NFTListPanel = ({ nfts }: Props) => {
         {nfts.map((nft, idx) => (
           <div
             key={idx}
-            className="border rounded bg-gray-900 p-3 text-sm text-white flex flex-col items-start"
-          >
+            className="border rounded bg-gray-900 p-3 text-sm text-white flex flex-col items-start">
+            {nft.metadata?.image && (
+            <img
+              src={nft.metadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/')}
+              alt={`NFT ${nft.tokenId}`}
+              className="mt-2 rounded max-w-full max-h-40 object-contain"
+            />
+            )}
             <div><strong>ID:</strong> {nft.tokenId}</div>
             <div><strong>Tema:</strong> {nft.tema || 'Desconocido'}</div>
             <div>

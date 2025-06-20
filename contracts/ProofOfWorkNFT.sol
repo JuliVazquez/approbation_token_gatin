@@ -1,78 +1,115 @@
-import { useEffect, useState } from 'react'
-import { getContract, getProofOfWorkNFTForWallet } from '../utils/web3'
-import { ABIS } from '../abi'
-import { CONTRACTS } from '../utils/contracts'
-import { BrowserProvider } from 'ethers'
-import type { ProofOfWorkData } from '../utils/web3'
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
 
-interface Props {
-  wallet: string
-  provider: BrowserProvider
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+
+// ✅ Interface necesaria para validar balance en contrato externo
+interface IClassNFT {
+    function balanceOf(address account, uint256 id) external view returns (uint256);
 }
 
-interface Metadata {
-  name: string
-  description: string
-  image: string
-}
+contract ProofOfWorkNFT is ERC1155, Ownable {
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIdCounter;
 
-interface AsistDataExt extends ProofOfWorkData {
-  tokenId: number
-  metadata: Metadata
-}
+    // ✅ Dirección checksum válida del contrato externo
+    address constant CLASS_NFT_ADDRESS = 0x1FEe62d24daA9fc0a18341B582937bE1D837F91d;
 
-const ProofStatusPanel = ({ wallet, provider }: Props) => {
-  const [asistData, setAsistData] = useState<AsistDataExt | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const nft = await getProofOfWorkNFTForWallet(wallet, provider)
-        setAsistData(nft)
-      } catch (err) {
-        console.error('Error al obtener datos del NFT:', err)
-      } finally {
-        setLoading(false)
-      }
+    struct PoFEntry {
+        uint256 id;
+        address contractAddress;
     }
 
-    fetchData()
-  }, [wallet, provider])
+    struct TPData {
+        string fecha;
+        string alumno;
+        address emisor;
+        PoFEntry[] PoF;
+    }
 
-  if (loading) return <div className="text-sm text-gray-300">Cargando datos del NFT de aprobación...</div>
-  if (!asistData) return <div className="text-sm text-red-400">No se encontró NFT de aprobación.</div>
+    mapping(uint256 => TPData) private datos;
 
-  return (
-    <div className="p-4 border rounded bg-neutral-900 text-white w-full space-y-4">
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">NFT de Aprobación</h3>
-        <p><strong>ID:</strong> {asistData.tokenId}</p>
-        <p><strong>Fecha:</strong> {asistData.fecha}</p>
-        <p><strong>Alumno:</strong> {asistData.alumno}</p>
-        <p><strong>Emisor:</strong> {asistData.emisor}</p>
-        <div>
-          <strong>Pruebas de trabajo (PoF):</strong>
-          <ul className="ml-6 list-disc text-sm mt-1">
-            {asistData.PoF.map((item) => (
-              <li key={item.id}>ID {item.id}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      {asistData.metadata && (
-        <div className="border-t pt-4">
-          <h4 className="text-md font-semibold mb-1">Metadata:</h4>
-          <p className="mb-1 text-sm">{asistData.metadata.description}</p>
-          <img
-            src={asistData.metadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/')}
-            alt={asistData.metadata.name}
-            className="w-full max-w-xs rounded-lg mx-auto"
-          />
-        </div>
-      )}
-    </div>
-  )
+    // ✅ Constructor con URI
+    constructor(string memory uri_) ERC1155(uri_) Ownable(msg.sender) {}
+
+    function mintAndTransfer(
+        address receptor,
+        string memory fecha,
+        string memory alumno,
+        address emisor,
+        PoFEntry[] memory PoF
+    ) external {
+        require(PoF.length == 10, "Se requieren exactamente 10 PoFs");
+        require(bytes(alumno).length > 0, "Alumno requerido");
+        require(emisor == msg.sender, "Solo el alumno puede emitir");
+
+        // ✅ Validar contractAddress y propiedad del token
+        IClassNFT classNFT = IClassNFT(CLASS_NFT_ADDRESS);
+        for (uint256 i = 0; i < PoF.length; i++) {
+            require(
+                PoF[i].contractAddress == CLASS_NFT_ADDRESS,
+                "PoF debe provenir de CLASS_NFT"
+            );
+            require(
+                classNFT.balanceOf(msg.sender, PoF[i].id) > 0,
+                "El alumno no posee el PoF indicado"
+            );
+        }
+
+        _tokenIdCounter.increment();
+        uint256 newTokenId = _tokenIdCounter.current();
+
+        TPData storage nuevo = datos[newTokenId];
+        nuevo.fecha = fecha;
+        nuevo.alumno = alumno;
+        nuevo.emisor = emisor;
+
+        for (uint256 i = 0; i < PoF.length; i++) {
+            nuevo.PoF.push(PoFEntry({
+                id: PoF[i].id,
+                contractAddress: PoF[i].contractAddress
+            }));
+        }
+
+        _mint(receptor, newTokenId, 1, "");
+    }
+
+    function getProofOfWork(uint256 tokenId)
+        public
+        view
+        returns (
+            string memory fecha,
+            string memory alumno,
+            address emisor,
+            PoFEntry[] memory PoF
+        )
+    {
+        TPData storage d = datos[tokenId];
+        fecha = d.fecha;
+        alumno = d.alumno;
+        emisor = d.emisor;
+
+        PoF = new PoFEntry[](d.PoF.length);
+        for (uint256 i = 0; i < d.PoF.length; i++) {
+            PoF[i] = d.PoF[i];
+        }
+    }
+
+    // ❗️Este uri es opcional si no usás el que pasás en el constructor
+    function uri(uint256) public pure override returns (string memory) {
+        return "ipfs://bafkreibimlves3n72f6ve4grqarekjp6smfbeak5jxq7c66psil5jvtt44";
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
 }
-
-export default ProofStatusPanel

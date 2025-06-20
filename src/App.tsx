@@ -20,6 +20,7 @@ function App() {
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const [mostrarNFTs, setMostrarNFTs] = useState(false)
   const [loadingMint, setLoadingMint] = useState(false)
+  const [disableMintButton, setDisableMintButton] = useState(true)
   const [toast, setToast] = useState<{ visible: boolean; message: string; hash?: string }>({
     visible: false,
     message: ''
@@ -27,25 +28,25 @@ function App() {
 
   const nftCacheRef = useRef<NFTAsist[] | null>(null)
 
-const connectWallet = async () => {
-  try {
-    const { account, provider } = await connectMetamask()
-    setAccount(account)
-    setProvider(provider)
+  const connectWallet = async () => {
+    try {
+      const { account, provider } = await connectMetamask()
+      setAccount(account)
+      setProvider(provider)
 
-    const esProfe = [WALLETS.TEST_WALLET_1.toLowerCase(),WALLETS.TEST_WALLET_2.toLowerCase()].includes(account.toLowerCase())
-    setEsProfesor(esProfe)
+      const esProfe = [WALLETS.TEST_WALLET_1.toLowerCase(), WALLETS.TEST_WALLET_2.toLowerCase()].includes(account.toLowerCase())
+      setEsProfesor(esProfe)
 
-    setValidado(false)
-    setMostrarFormulario(false)
-    setMostrarNFTs(false)
-    setToast({ visible: false, message: '' })
-    nftCacheRef.current = null
-  } catch (error) {
-    alert('No se pudo conectar con Metamask')
-    console.error(error)
+      setValidado(false)
+      setMostrarFormulario(false)
+      setMostrarNFTs(false)
+      setToast({ visible: false, message: '' })
+      nftCacheRef.current = null
+    } catch (error) {
+      alert('No se pudo conectar con Metamask')
+      console.error(error)
+    }
   }
-}
 
   const disconnectWallet = () => {
     setAccount(null)
@@ -80,10 +81,8 @@ const connectWallet = async () => {
 
     const PoF = cache.slice(0, 10).map((nft) => ({
       id: nft.tokenId,
-      // tema: nft.tema || 'Desconocido',
       contractAddress: CONTRACTS.CLASS_NFT
     }))
-
 
     const payload: ProofOfWorkData = {
       fecha: data.fecha,
@@ -118,83 +117,91 @@ const connectWallet = async () => {
   }
 
   return (
-  <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center">
-    {!esProfesor && (
-      <Header account={account} onConnect={connectWallet} onDisconnect={disconnectWallet} />
-    )}
+    <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center">
+      {!esProfesor && (
+        <Header account={account} onConnect={connectWallet} onDisconnect={disconnectWallet} />
+      )}
 
-    <main className="w-full max-w-4xl p-6">
-      <h2 className="text-xl font-semibold mb-4">Bienvenido al sistema de validación</h2>
+      <main className="w-full max-w-4xl p-6">
+        <h2 className="text-xl font-semibold mb-4">Bienvenido al sistema de validación</h2>
 
-      {!account || !provider ? (
-        <p className="text-center">Conectá tu wallet para continuar.</p>
-      ) : esProfesor ? (
-        <ProofStatusPanel wallet={account} provider={provider} />
-      ) : (
-        <>
-          <CheckPanel
-            wallet={account}
-            provider={provider}
-            onValid={(nfts) => {
-              setValidado(true)
-              nftCacheRef.current = nfts
-              setMostrarNFTs(true)
+        {!account || !provider ? (
+          <p className="text-center">Conectá tu wallet para continuar.</p>
+        ) : esProfesor ? (
+          <ProofStatusPanel wallet={account} provider={provider} />
+        ) : (
+          <>
+            <CheckPanel
+              wallet={account}
+              provider={provider}
+              onValid={(nfts) => {
+              if (!nftCacheRef.current || nftCacheRef.current.length === 0) {
+                setValidado(true)
+                setDisableMintButton(false)
+                setMostrarFormulario(false)
+                nftCacheRef.current = nfts
+                setMostrarNFTs(true)
+              }
             }}
-            onReset={() => {
-              setMostrarNFTs(false)
-              nftCacheRef.current = null
-            }}
-          />
-
-          {validado && nftCacheRef.current && (
-            <div className="my-4">
-              <button
-                className="mb-2 px-4 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
-                onClick={() => setMostrarNFTs((prev) => !prev)}
-              >
-                {mostrarNFTs ? 'Ocultar NFTs ⬆' : 'Mostrar NFTs ⬇'}
-              </button>
-
-              {mostrarNFTs && <NFTListPanel nfts={nftCacheRef.current} />}
-            </div>
-          )}
-
-          {validado && !mostrarFormulario && (
-            <div className="mt-6 text-center">
-              <button
-                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold"
-                onClick={() => {
-                  setMostrarNFTs(false)
-                  setToast({ visible: false, message: '' })
-                  setMostrarFormulario(true)
-                }}
-              >
-                Emitir ProofOfWorkNFT
-              </button>
-            </div>
-          )}
-
-          {validado && mostrarFormulario && (
-            <MintPanel
-              onSubmit={(data) => handleMintSubmit(data)}
-              onCancel={() => setMostrarFormulario(false)}
-              loading={loadingMint}
+              onReset={() => {
+                setMostrarNFTs(false)
+                nftCacheRef.current = null
+                setDisableMintButton(true)
+              }}
             />
-          )}
-        </>
-      )}
 
-      {toast.visible && (
-        <Toast
-          message={toast.message}
-          hash={toast.hash}
-          onClose={() => setToast({ visible: false, message: '', hash: undefined })}
-        />
-      )}
-    </main>
-  </div>
-)
+            <div className="mt-6 text-center min-h-[72px] flex justify-center items-center">
+              {disableMintButton ? (
+                <div className="bg-red-800 text-white p-4 rounded-lg shadow-md">
+                  <p className="text-md font-semibold">Aún no cumple los requisitos para aprobar.</p>
+                </div>
+              ) : (
+                <button
+                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold"
+                  onClick={() => {
+                    setMostrarNFTs(false)
+                    setToast({ visible: false, message: '' })
+                    setMostrarFormulario(true)
+                  }}
+                >
+                  Emitir ProofOfWorkNFT
+                </button>
+              )}
+            </div>
 
+            {validado && nftCacheRef.current && (
+              <div className="my-4">
+                <button
+                  className="mb-2 px-4 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+                  onClick={() => setMostrarNFTs((prev) => !prev)}
+                >
+                  {mostrarNFTs ? 'Ocultar NFTs ⬆' : 'Mostrar NFTs ⬇'}
+                </button>
+
+                {mostrarNFTs && <NFTListPanel nfts={nftCacheRef.current} />}
+              </div>
+            )}
+
+            {validado && mostrarFormulario && (
+              <MintPanel
+                onSubmit={(data) => handleMintSubmit(data)}
+                onCancel={() => setMostrarFormulario(false)}
+                loading={loadingMint}
+              />
+            )}
+          </>
+        )}
+
+        {toast.visible && (
+          <Toast
+            message={toast.message}
+            hash={toast.hash}
+            onClose={() => setToast({ visible: false, message: '', hash: undefined })}
+          />
+        )}
+      </main>
+    </div>
+  )
 }
 
 export default App
