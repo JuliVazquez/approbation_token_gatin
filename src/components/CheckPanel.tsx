@@ -24,40 +24,47 @@ const CheckPanel = ({ wallet, provider, onValid, onReset }: Props) => {
   const walletValidado = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!wallet || !provider) return
-    if (yaValidado.current && walletValidado.current === wallet && forceRefresh === 0) return
+  let cancelado = false
 
-    const validar = async () => {
-      setLoading(true)
-      setCumpleCantidad(false)
-      setCumpleFechas(false)
-      setSinMovimientos(false)
+  const validar = async () => {
+    setLoading(true)
+    setCumpleCantidad(false)
+    setCumpleFechas(false)
+    setSinMovimientos(false)
 
-      try {
-        const nfts = await fetchNFTsFromWallet(wallet, provider, CONTRACTS.CLASS_NFT)
+    try {
+      const nfts = await fetchNFTsFromWallet(wallet, provider, CONTRACTS.CLASS_NFT)
 
-        const cumpleA = nfts.length >= 10
-        const cumpleB = nfts.length > 0 && nfts.every(nft => nft.fecha && nft.fecha < FECHA_CORTE)
-        const cumpleC = nfts.length > 0 && nfts.every(nft => !nft.fueTransferido)
+      const cumpleA = nfts.length >= 10
+      const cumpleB = nfts.length > 0 && nfts.every(nft => nft.fecha && nft.fecha < FECHA_CORTE)
+      const cumpleC = nfts.length > 0 && nfts.every(nft => !nft.fueTransferido)
 
+      if (!cancelado) {
         setCumpleCantidad(cumpleA)
         setCumpleFechas(cumpleB)
         setSinMovimientos(cumpleC)
 
-        if (cumpleA && cumpleB && cumpleC) {
+        if (cumpleA && cumpleB && cumpleC && (!yaValidado.current || walletValidado.current !== wallet)) {
           yaValidado.current = true
           walletValidado.current = wallet
           onValid(nfts)
         }
-      } catch (error) {
-        console.error('Error al validar NFTs:', error)
-      } finally {
-        setLoading(false)
       }
+    } catch (error) {
+      console.error('Error al validar NFTs:', error)
+    } finally {
+      if (!cancelado) setLoading(false)
     }
+  }
 
+  if (wallet && provider && (!yaValidado.current || walletValidado.current !== wallet || forceRefresh > 0)) {
     validar()
-  }, [wallet, provider, onValid, forceRefresh])
+  }
+
+  return () => {
+    cancelado = true
+  }
+}, [wallet, provider, forceRefresh])
 
   const renderEstado = (ok: boolean, texto: string) => {
     return (
@@ -84,7 +91,7 @@ const CheckPanel = ({ wallet, provider, onValid, onReset }: Props) => {
             yaValidado.current = false
             walletValidado.current = null
             setForceRefresh(prev => prev + 1)
-            onReset?.() 
+            onReset?.()
           }}
           className="text-sm text-blue-400 hover:text-blue-200"
         >

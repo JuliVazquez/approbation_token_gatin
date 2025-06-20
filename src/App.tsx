@@ -54,12 +54,7 @@ function App() {
     nftCacheRef.current = null
   }
 
-  const handleMintSubmit = async (data: {
-    nombre: string
-    apellido: string
-    fecha: string
-    alumno: string
-  }) => {
+  const handleMintSubmit = async (data: { nombre: string, apellido: string, fecha: string, alumno: string }) => {
     if (!account || !provider) {
       alert('No hay wallet conectada')
       return
@@ -68,23 +63,17 @@ function App() {
     const alumno = `${data.nombre} ${data.apellido}`
     const emisor = account
     const cache = nftCacheRef.current
-
     if (!cache || cache.length < 10) {
       alert('Error: No se encontraron los 10 NFTs base.')
       return
     }
 
-    const PoF = cache.slice(0, 10).map((nft) => ({
+    const PoF = cache.slice(0, 10).map(nft => ({
       id: nft.tokenId,
       contractAddress: CONTRACTS.CLASS_NFT
     }))
 
-    const payload: ProofOfWorkData = {
-      fecha: data.fecha,
-      alumno,
-      emisor,
-      PoF
-    }
+    const payload: ProofOfWorkData = { fecha: data.fecha, alumno, emisor, PoF }
 
     setLoadingMint(true)
     const contract = await getContract(provider, CONTRACTS.POW_NFT, ABIS.POW_TEST)
@@ -123,20 +112,20 @@ function App() {
               wallet={account}
               provider={provider}
               onValid={(nfts) => {
-                if (!nftCacheRef.current || nftCacheRef.current.length === 0) {
-                  setValidado(true)
-                  setDisableMintButton(false)
-                  setMostrarFormulario(false)
-                  setMintSuccess(false)
-                  nftCacheRef.current = nfts
-                  setMostrarNFTs(true)
-                }
+                setValidado(true)
+                setDisableMintButton(false)
+                setMostrarFormulario(false)
+                setMintSuccess(false)
+                nftCacheRef.current = nfts
+                setMostrarNFTs(true)
               }}
               onReset={() => {
+                setValidado(false)
                 setMostrarNFTs(false)
-                nftCacheRef.current = null
+                setMostrarFormulario(false)
                 setDisableMintButton(true)
                 setMintSuccess(false)
+                nftCacheRef.current = null
               }}
             />
 
@@ -166,11 +155,10 @@ function App() {
               <div className="my-4">
                 <button
                   className="mb-2 px-4 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
-                  onClick={() => setMostrarNFTs((prev) => !prev)}
+                  onClick={() => setMostrarNFTs(prev => !prev)}
                 >
                   {mostrarNFTs ? 'Ocultar NFTs ⬆' : 'Mostrar NFTs ⬇'}
                 </button>
-
                 {mostrarNFTs && <NFTListPanel nfts={nftCacheRef.current} />}
               </div>
             )}
