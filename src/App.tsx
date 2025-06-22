@@ -10,6 +10,7 @@ import { WALLETS } from './utils/wallets'
 import { ABIS } from './abi/index'
 import NFTListPanel from './components/NFTListaPanel'
 import ProofStatusPanel from './components/ProofStatusPanel'
+import Toast from './components/Toast'
 
 function App() {
   const [esProfesor, setEsProfesor] = useState(false)
@@ -21,6 +22,10 @@ function App() {
   const [loadingMint, setLoadingMint] = useState(false)
   const [disableMintButton, setDisableMintButton] = useState(true)
   const [mintSuccess, setMintSuccess] = useState(false)
+  const [toast, setToast] = useState<{ visible: boolean; message: string; hash?: string }>({
+    visible: false,
+    message: ''
+  })
 
   const nftCacheRef = useRef<NFTAsist[] | null>(null)
 
@@ -37,6 +42,7 @@ function App() {
       setMostrarFormulario(false)
       setMostrarNFTs(false)
       setMintSuccess(false)
+      setToast({ visible: false, message: '' })
       nftCacheRef.current = null
     } catch (error) {
       alert('No se pudo conectar con Metamask')
@@ -51,6 +57,7 @@ function App() {
     setMostrarFormulario(false)
     setMostrarNFTs(false)
     setMintSuccess(false)
+    setToast({ visible: false, message: '' })
     nftCacheRef.current = null
   }
 
@@ -81,7 +88,14 @@ function App() {
 
     for (const receptor of receptores) {
       try {
-        await mintProofOfWorkNFT(contract, receptor, payload)
+        const txResult = await mintProofOfWorkNFT(contract, receptor, payload)
+        if (txResult) {
+          setToast({
+            visible: true,
+            message: `✅ NFT emitido exitosamente a ${receptor}`,
+            hash: txResult.hash
+          })
+        }
       } catch (error) {
         console.error(`❌ Error al mintear para ${receptor}:`, error)
         alert(`Error al mintear el NFT para ${receptor}`)
@@ -125,6 +139,7 @@ function App() {
                 setMostrarFormulario(false)
                 setDisableMintButton(true)
                 setMintSuccess(false)
+                setToast({ visible: false, message: '', hash: undefined })
                 nftCacheRef.current = null
               }}
             />
@@ -143,6 +158,7 @@ function App() {
                   className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold"
                   onClick={() => {
                     setMostrarNFTs(false)
+                    setToast({ visible: false, message: '' })
                     setMostrarFormulario(true)
                   }}
                 >
@@ -171,6 +187,14 @@ function App() {
               />
             )}
           </>
+        )}
+
+        {toast.visible && (
+          <Toast
+            message={toast.message}
+            hash={toast.hash}
+            onClose={() => setToast({ visible: false, message: '', hash: undefined })}
+          />
         )}
       </main>
     </div>

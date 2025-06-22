@@ -58,6 +58,12 @@ contract ProofOfWorkNFT is ERC1155, Ownable {
                 "El alumno no posee el PoF indicado"
             );
         }
+        // Validar que el receptor no tenga un ProofOfWorkNFT
+        for (uint256 i = 1; i <= _tokenIdCounter.current(); i++) {
+            if (balanceOf(receptor, i) > 0) {
+                revert("El receptor ya posee un ProofOfWorkNFT");
+            }
+        }
 
         _tokenIdCounter.increment();
         uint256 newTokenId = _tokenIdCounter.current();
