@@ -1,22 +1,25 @@
 import { useState } from 'react'
-import { getProofOfWorkNFTForWallet } from '../utils/web3'
+import { getProofOfWorkNFTForWallet, getContract, mintApprovalNFT } from '../utils/web3'
 import type { AsistDataExt } from '../utils/web3'
-import { BrowserProvider } from 'ethers'
+import { BrowserProvider, Contract } from 'ethers'
 import { CONTRACTS } from '../utils/contracts'
 import { RotateCcw, LogOut } from 'lucide-react'
+import { ABIS } from '../abi'
 
 interface Props {
   wallet: string
   provider: BrowserProvider
+  setToast: (data: { visible: boolean; message: string; hash?: string }) => void
 }
 
-const ProofStatusPanel = ({ wallet, provider }: Props) => {
+const ProofStatusPanel = ({ wallet, provider, setToast }: Props) => {
   const [asistData, setAsistData] = useState<AsistDataExt | null>(null)
   const [loading, setLoading] = useState(false)
   const [contractAddress, setContractAddress] = useState(CONTRACTS.POW_NFT)
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
   const [nota, setNota] = useState('')
   const [comentario, setComentario] = useState('')
+  const [approvedHash, setApprovedHash] = useState<string | null>(null)
 
   const fetchData = async () => {
     if (!contractAddress) return
@@ -37,15 +40,34 @@ const ProofStatusPanel = ({ wallet, provider }: Props) => {
     setContractAddress(CONTRACTS.POW_NFT)
   }
 
-  const handleSubmit = () => {
-    console.log('📝 Enviar evaluación:', { nota, comentario })
-    // Aquí iría la lógica real de envío
-    setMostrarFormulario(false)
-    setNota('')
-    setComentario('')
+const handleSubmit = async () => {
+  if (!asistData?.emisor || !provider) {
+    alert("No se puede enviar la evaluación: faltan datos o conexión.")
+    return
   }
 
-  const uniqueContracts = Array.from(new Set(asistData?.PoF.map(item => item.contractAddress)))
+  try {
+    const contract = await getContract(provider, CONTRACTS.APPROVAL, ABIS.APPROVAL)
+    const txResult = await mintApprovalNFT(contract as Contract, asistData.emisor, comentario, nota)
+
+    if (txResult) {
+      setToast({
+        visible: true,
+        message: '✅ NFT de aprobación emitido correctamente',
+        hash: txResult.hash
+      })
+
+      setApprovedHash(txResult.hash)
+      setMostrarFormulario(false)
+      setComentario('')
+      setNota('')
+    }
+  } catch (err) {
+    console.error("❌ Error al emitir NFT de aprobación:", err)
+    alert("Error al emitir el NFT.")
+  }
+}
+
 
   return (
     <div className="p-4 border rounded bg-neutral-900 text-white w-full space-y-4">
@@ -91,9 +113,6 @@ const ProofStatusPanel = ({ wallet, provider }: Props) => {
             <p><strong>Fecha:</strong> {asistData.fecha}</p>
             <p><strong>Alumno (quien emitió):</strong> {asistData.alumno}</p>
             <p><strong>Emisor (contrato que recibió):</strong> {asistData.emisor}</p>
-            {uniqueContracts.length > 0 && (
-              <p><strong>Contrato(s) de NFTs base:</strong> {uniqueContracts.join(', ')}</p>
-            )}
             <div>
               <strong>Pruebas de trabajo (PoF):</strong>
               <ul className="ml-6 list-disc text-sm mt-1">
@@ -118,12 +137,19 @@ const ProofStatusPanel = ({ wallet, provider }: Props) => {
               />
             </div>
           )}
-          <div className="pt-4 text-center">
-            <button
-              onClick={() => setMostrarFormulario(true)}
-              className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-semibold"
-            >Aprobar</button>
-          </div>
+
+          {approvedHash ? (
+            <div className="mt-4 p-4 bg-green-800 text-white rounded-lg shadow text-sm">
+              ✅ Se aprobó al alumno <span className="font-mono">{asistData.emisor}</span>.
+            </div>
+          ) : (
+            <div className="pt-4 text-center">
+              <button
+                onClick={() => setMostrarFormulario(true)}
+                className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-semibold"
+              >Aprobar</button>
+            </div>
+          )}
         </div>
       )}
 

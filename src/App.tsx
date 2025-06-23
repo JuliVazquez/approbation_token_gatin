@@ -119,7 +119,7 @@ function App() {
         {!account || !provider ? (
           <p className="text-center">Conectá tu wallet para continuar.</p>
         ) : esProfesor ? (
-          <ProofStatusPanel wallet={account} provider={provider} />
+        <ProofStatusPanel wallet={account} provider={provider} setToast={setToast} />
         ) : (
           <>
             <CheckPanel

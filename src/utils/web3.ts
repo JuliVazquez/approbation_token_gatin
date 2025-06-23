@@ -337,3 +337,21 @@ export const getProofOfWorkNFTForWallet = async (
 
   return null
 }
+
+export const mintApprovalNFT = async (
+  contract: Contract,
+  alumno: string,
+  comentario: string,
+  nota: string
+): Promise<{ hash: string } | null> => {
+  try {
+    const tx = await contract.mintEvaluacion(alumno, comentario, nota)
+    console.log("⏳ Tx enviada:", tx.hash)
+    await tx.wait()
+    console.log("✅ NFT de aprobación emitido")
+    return { hash: tx.hash }
+  } catch (error) {
+    console.error("❌ Error al emitir NFT de aprobación:", error)
+    return null
+  }
+}
