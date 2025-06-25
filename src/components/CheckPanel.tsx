@@ -95,7 +95,7 @@ const CheckPanel = ({ wallet, provider, onValid, onReset }: Props) => {
           }}
           className="text-sm text-blue-400 hover:text-blue-200"
         >
-          🔄 Actualizar validación
+          🔄 Revalidar
         </button>
       </div>
 

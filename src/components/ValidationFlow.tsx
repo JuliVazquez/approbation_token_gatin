@@ -1,13 +1,13 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import CheckPanel from './CheckPanel'
 import MintPanel from './MintPanel'
 import NFTListPanel from './NFTListaPanel'
 import Toast from './Toast'
-import { getContract, mintProofOfWorkNFT } from '../utils/web3'
+import { getContract, mintProofOfWorkNFT, getAllApprovalNFTsForWallet } from '../utils/web3'
 import { CONTRACTS } from '../utils/contracts'
 import { ABIS } from '../abi'
 import { WALLETS } from '../utils/wallets'
-import type { NFTAsist, ProofOfWorkData } from '../utils/web3'
+import type { NFTAsist, ProofOfWorkData, ApprovalNFTData } from '../utils/web3'
 import type { BrowserProvider } from 'ethers'
 
 interface Props {
@@ -25,8 +25,22 @@ const ValidationFlow = ({ wallet, provider }: Props) => {
     visible: false,
     message: ''
   })
+  const [yaAprobado, setYaAprobado] = useState(false)
 
   const nftCacheRef = useRef<NFTAsist[] | null>(null)
+
+  const verificarAprobacion = async () => {
+    try {
+      const approvals: ApprovalNFTData[] = await getAllApprovalNFTsForWallet(wallet, provider, CONTRACTS.APPROVAL)
+      setYaAprobado(approvals.length > 0)
+    } catch (error) {
+      console.error('Error al verificar aprobación:', error)
+    }
+  }
+
+  useEffect(() => {
+    verificarAprobacion()
+  }, [wallet, provider])
 
   const handleMintSubmit = async (data: { nombre: string, apellido: string, fecha: string, alumno: string }) => {
     const alumno = `${data.nombre} ${data.apellido}`
@@ -66,6 +80,7 @@ const ValidationFlow = ({ wallet, provider }: Props) => {
 
     setLoadingMint(false)
     setMostrarFormulario(false)
+    verificarAprobacion()
   }
 
   return (
@@ -79,6 +94,7 @@ const ValidationFlow = ({ wallet, provider }: Props) => {
           setMostrarFormulario(false)
           nftCacheRef.current = nfts
           setMostrarNFTs(true)
+          verificarAprobacion()
         }}
         onReset={() => {
           setValidado(false)
@@ -87,15 +103,26 @@ const ValidationFlow = ({ wallet, provider }: Props) => {
           setDisableMintButton(true)
           setToast({ visible: false, message: '', hash: undefined })
           nftCacheRef.current = null
+          verificarAprobacion()
         }}
       />
 
-      <div className="mt-6 text-center min-h-[72px] flex justify-center items-center">
-        {disableMintButton ? (
+      <div className="mt-6 text-center min-h-[72px] flex flex-col items-center gap-2">
+        {yaAprobado ? (
+          <div className="bg-orange-500 text-white p-4 rounded-lg shadow-md">
+            <p className="text-md font-semibold">ℹ️ El alumno ya tiene un NFT de aprobación.</p>
+          </div>
+        ) : disableMintButton ? (
           <div className="bg-red-800 text-white p-4 rounded-lg shadow-md">
             <p className="text-md font-semibold">Aún no cumple los requisitos para aprobar.</p>
           </div>
         ) : (
+          <div className="bg-green-800 text-white p-4 rounded-lg shadow-md">
+            <p className="text-md font-semibold">✅ Cumple con los requisitos para aprobar.</p>
+          </div>
+        )}
+
+        {!disableMintButton && (
           <button
             className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold"
             onClick={() => {
