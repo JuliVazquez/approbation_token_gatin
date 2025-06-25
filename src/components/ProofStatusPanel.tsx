@@ -102,7 +102,16 @@ const handleSubmit = async () => {
         </button>
       </div>
 
-      {loading && <div className="text-sm text-gray-300">Cargando datos del NFT de aprobación...</div>}
+      {loading && (
+        <div className="flex justify-center items-center py-6">
+          <svg className="animate-spin h-6 w-6 text-white" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          <span className="ml-3 text-sm text-gray-300">Cargando datos del NFT de aprobación...</span>
+        </div>
+      )}
+
       {!loading && !asistData && <div className="text-sm text-red-400">No se encontró NFT de aprobación.</div>}
 
       {asistData && !mostrarFormulario && (

@@ -30,6 +30,7 @@ const MintPanel = ({ onSubmit, onCancel, loading }: Props) => {
         </button>
       )}
       <h3 className="text-lg font-semibold mb-4">Formulario de emisión de ProofOfWorkNFT</h3>
+      <h2 className='mb-4'> Solamente se permite una única solicitud por docente, emita el NFT a conciencia.</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm mb-1">Nombre</label>

@@ -1,33 +1,21 @@
-import { useState, useRef } from 'react'
+// src/App.tsx
+import { useState } from 'react'
 import Header from './components/Header'
-import CheckPanel from './components/CheckPanel'
-import MintPanel from './components/MintPanel'
-import { connectMetamask, getContract, mintProofOfWorkNFT } from './utils/web3'
-import { BrowserProvider } from 'ethers'
-import type { NFTAsist, ProofOfWorkData } from './utils/web3'
-import { CONTRACTS } from './utils/contracts'
-import { WALLETS } from './utils/wallets'
-import { ABIS } from './abi/index'
-import NFTListPanel from './components/NFTListaPanel'
 import ProofStatusPanel from './components/ProofStatusPanel'
-import Toast from './components/Toast'
+import ApprovalStatusPanel from './components/ApprovalStatusPanel'
+import ValidationFlow from './components/ValidationFlow'
+import { connectMetamask } from './utils/web3'
+import { WALLETS } from './utils/wallets'
+import { CONTRACTS } from './utils/contracts'
+import type { BrowserProvider } from 'ethers'
+
+type Panel = 'validacion' | 'aprobaciones' | 'docente'
 
 function App() {
   const [esProfesor, setEsProfesor] = useState(false)
   const [account, setAccount] = useState<string | null>(null)
   const [provider, setProvider] = useState<BrowserProvider | null>(null)
-  const [validado, setValidado] = useState(false)
-  const [mostrarFormulario, setMostrarFormulario] = useState(false)
-  const [mostrarNFTs, setMostrarNFTs] = useState(false)
-  const [loadingMint, setLoadingMint] = useState(false)
-  const [disableMintButton, setDisableMintButton] = useState(true)
-  const [mintSuccess, setMintSuccess] = useState(false)
-  const [toast, setToast] = useState<{ visible: boolean; message: string; hash?: string }>({
-    visible: false,
-    message: ''
-  })
-
-  const nftCacheRef = useRef<NFTAsist[] | null>(null)
+  const [panelActivo, setPanelActivo] = useState<Panel>('validacion')
 
   const connectWallet = async () => {
     try {
@@ -35,15 +23,13 @@ function App() {
       setAccount(account)
       setProvider(provider)
 
-      const esProfe = [WALLETS.TEST_WALLET_1.toLowerCase(), WALLETS.TEST_WALLET_2.toLowerCase()].includes(account.toLowerCase())
-      setEsProfesor(esProfe)
+      const esProfe = [
+        WALLETS.TEST_WALLET_1.toLowerCase(),
+        WALLETS.TEST_WALLET_2.toLowerCase()
+      ].includes(account.toLowerCase())
 
-      setValidado(false)
-      setMostrarFormulario(false)
-      setMostrarNFTs(false)
-      setMintSuccess(false)
-      setToast({ visible: false, message: '' })
-      nftCacheRef.current = null
+      setEsProfesor(esProfe)
+      setPanelActivo('validacion')
     } catch (error) {
       alert('No se pudo conectar con Metamask')
       console.error(error)
@@ -53,148 +39,84 @@ function App() {
   const disconnectWallet = () => {
     setAccount(null)
     setProvider(null)
-    setValidado(false)
-    setMostrarFormulario(false)
-    setMostrarNFTs(false)
-    setMintSuccess(false)
-    setToast({ visible: false, message: '' })
-    nftCacheRef.current = null
+    setEsProfesor(false)
+    setPanelActivo('validacion')
   }
 
-  const handleMintSubmit = async (data: { nombre: string, apellido: string, fecha: string, alumno: string }) => {
-    if (!account || !provider) {
-      alert('No hay wallet conectada')
-      return
-    }
+  const renderTabs = () => (
+    <div className="flex border-b border-gray-600 mb-6">
+      <button
+        onClick={() => setPanelActivo('validacion')}
+        className={`px-4 py-2 font-semibold text-sm rounded-t ${
+          panelActivo === 'validacion'
+            ? 'bg-emerald-600 text-white'
+            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+        }`}
+      >
+        🧪 Validación
+      </button>
 
-    const alumno = `${data.nombre} ${data.apellido}`
-    const emisor = account
-    const cache = nftCacheRef.current
-    if (!cache || cache.length < 10) {
-      alert('Error: No se encontraron los 10 NFTs base.')
-      return
-    }
+      <button
+        onClick={() => setPanelActivo('aprobaciones')}
+        className={`px-4 py-2 font-semibold text-sm rounded-t ml-2 ${
+          panelActivo === 'aprobaciones'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+        }`}
+      >
+        📘 Estado del curso
+      </button>
 
-    const PoF = cache.slice(0, 10).map(nft => ({
-      id: nft.tokenId,
-      contractAddress: CONTRACTS.CLASS_NFT
-    }))
-
-    const payload: ProofOfWorkData = { fecha: data.fecha, alumno, emisor, PoF }
-
-    setLoadingMint(true)
-    const contract = await getContract(provider, CONTRACTS.POW_NFT, ABIS.POW_TEST)
-    const receptores = [WALLETS.TEST_WALLET_1, WALLETS.TEST_WALLET_2]
-
-    for (const receptor of receptores) {
-      try {
-        const txResult = await mintProofOfWorkNFT(contract, receptor, payload)
-        if (txResult) {
-          setToast({
-            visible: true,
-            message: `✅ NFT emitido exitosamente a ${receptor}`,
-            hash: txResult.hash
-          })
-        }
-      } catch (error) {
-        console.error(`❌ Error al mintear para ${receptor}:`, error)
-        alert(`Error al mintear el NFT para ${receptor}`)
-      }
-    }
-
-    setLoadingMint(false)
-    setMostrarFormulario(false)
-    setMintSuccess(true)
-  }
+      <button
+        onClick={() => setPanelActivo('docente')}
+        className={`px-4 py-2 font-semibold text-sm rounded-t ml-2 ${
+          panelActivo === 'docente'
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+        }`}
+      >
+        🧑‍🏫 Docente
+      </button>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-gray-800 text-white flex flex-col items-center">
-      {!esProfesor && (
-        <Header account={account} onConnect={connectWallet} onDisconnect={disconnectWallet} />
-      )}
+      <Header account={account} onConnect={connectWallet} onDisconnect={disconnectWallet} />
 
       <main className="w-full max-w-4xl p-6">
         <h2 className="text-xl font-semibold mb-4">Bienvenido al sistema de validación</h2>
 
         {!account || !provider ? (
           <p className="text-center">Conectá tu wallet para continuar.</p>
-        ) : esProfesor ? (
-        <ProofStatusPanel wallet={account} provider={provider} setToast={setToast} />
         ) : (
           <>
-            <CheckPanel
-              wallet={account}
-              provider={provider}
-              onValid={(nfts) => {
-                setValidado(true)
-                setDisableMintButton(false)
-                setMostrarFormulario(false)
-                setMintSuccess(false)
-                nftCacheRef.current = nfts
-                setMostrarNFTs(true)
-              }}
-              onReset={() => {
-                setValidado(false)
-                setMostrarNFTs(false)
-                setMostrarFormulario(false)
-                setDisableMintButton(true)
-                setMintSuccess(false)
-                setToast({ visible: false, message: '', hash: undefined })
-                nftCacheRef.current = null
-              }}
-            />
+            {renderTabs()}
 
-            <div className="mt-6 text-center min-h-[72px] flex justify-center items-center">
-              {disableMintButton ? (
-                <div className="bg-red-800 text-white p-4 rounded-lg shadow-md">
-                  <p className="text-md font-semibold">Aún no cumple los requisitos para aprobar.</p>
-                </div>
-              ) : mintSuccess ? (
-                <div className="bg-green-800 text-white p-4 rounded-lg shadow-md">
-                  <p className="text-md font-semibold">✅ NFT de ProofOfWork emitidos y minteados exitosamente</p>
-                </div>
-              ) : (
-                <button
-                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold"
-                  onClick={() => {
-                    setMostrarNFTs(false)
-                    setToast({ visible: false, message: '' })
-                    setMostrarFormulario(true)
-                  }}
-                >
-                  Emitir ProofOfWorkNFT
-                </button>
-              )}
-            </div>
-
-            {validado && nftCacheRef.current && (
-              <div className="my-4">
-                <button
-                  className="mb-2 px-4 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
-                  onClick={() => setMostrarNFTs(prev => !prev)}
-                >
-                  {mostrarNFTs ? 'Ocultar NFTs ⬆' : 'Mostrar NFTs ⬇'}
-                </button>
-                {mostrarNFTs && <NFTListPanel nfts={nftCacheRef.current} />}
-              </div>
+            {panelActivo === 'validacion' && (
+              <ValidationFlow wallet={account} provider={provider} />
             )}
 
-            {validado && mostrarFormulario && (
-              <MintPanel
-                onSubmit={(data) => handleMintSubmit(data)}
-                onCancel={() => setMostrarFormulario(false)}
-                loading={loadingMint}
+            {panelActivo === 'aprobaciones' && (
+              <ApprovalStatusPanel
+                wallet={account}
+                provider={provider}
+                contractAddress={CONTRACTS.APPROVAL}
+                onProceed={() => setPanelActivo('validacion')}
               />
             )}
-          </>
-        )}
 
-        {toast.visible && (
-          <Toast
-            message={toast.message}
-            hash={toast.hash}
-            onClose={() => setToast({ visible: false, message: '', hash: undefined })}
-          />
+            {panelActivo === 'docente' && (
+              esProfesor ? (
+                <ProofStatusPanel wallet={account} provider={provider} setToast={() => {}} />
+              ) : (
+                <div className="p-6 bg-red-900 text-white rounded-lg text-center shadow">
+                  <p className="text-lg font-semibold">🚫 Sección inhabilitada</p>
+                  <p className="text-sm mt-1">Esta sección es exclusiva para docentes autorizados.</p>
+                </div>
+              )
+            )}
+          </>
         )}
       </main>
     </div>

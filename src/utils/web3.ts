@@ -51,7 +51,17 @@ export interface AsistDataExt {
   }[]
 }
 
-
+export interface ApprovalNFTData {
+  tokenId: string
+  comentario: string
+  nota: string
+  emisor: string
+  metadata: {
+    name: string
+    description: string
+    image: string
+  }
+}
 
 // Conexión con Metamask y obtención del provider
 export function getProvider(): BrowserProvider {
@@ -150,43 +160,6 @@ export const fetchNFTsFromWallet = async (
   }
   return found
 };
-
-// Obtiene la fecha de mint de un token específico
-// export const getMintDate = async (
-//   contract: Contract,
-//   provider: BrowserProvider,
-//   wallet: string,
-//   tokenId: number
-// ): Promise<Date | null> => {
-//   try {
-//       const events = await contract.queryFilter(
-//       contract.filters.TransferSingle(),
-//       0, // ← buscar desde el bloque génesis
-//       'latest'
-//       )
-//     console.log("Eventos TransferSingle encontrados:", events.length)
-//     const mintEvent = events.find((e) => {
-//       if ("args" in e) {
-//         return (
-//           e.args.id.toString() === tokenId.toString() &&
-//           e.args.from === "0x0000000000000000000000000000000000000000" &&
-//           e.args.to.toLowerCase() === wallet.toLowerCase()
-//         )
-//       }
-//       return false
-//     })
-
-//     if (!mintEvent) return null
-
-//     const block = await provider.getBlock(mintEvent.blockNumber)
-//       if (!block) return null;
-//       return new Date(block.timestamp * 1000);
-//   } catch (e) {
-//     console.error(`Error obteniendo timestamp de mint para token ${tokenId}`, e)
-//     return null
-//   }
-// }
-
 
 // Escanea los eventos TransferSingle para un token específico y wallet
 export const getTransferSingleEvents = async (
@@ -354,4 +327,65 @@ export const mintApprovalNFT = async (
     console.error("❌ Error al emitir NFT de aprobación:", error)
     return null
   }
+}
+
+// utils/web3.ts
+export async function getAllApprovalNFTsForWallet(
+  wallet: string,
+  provider: BrowserProvider,
+  contractAddress: string,
+  maxTokenId = 2  // Ajusta según el máximo de tokenId que quieras buscar
+): Promise<ApprovalNFTData[]> {
+  const contract: Contract = await getContract(provider, contractAddress, ABIS.APPROVAL)
+  const resultados: ApprovalNFTData[] = []
+
+  for (let tokenId = 1; tokenId <= maxTokenId; tokenId++) {
+    try {
+      const balance = await contract.balanceOf(wallet, tokenId)
+      if (balance.toString() === '0') continue
+
+      const [comentario, nota, emisor]: [string, string, string] = await contract.getEvaluacion(tokenId)
+      const uri: string = await contract.uri(tokenId)
+      const metadataUrl = uri.replace('ipfs://', 'https://ipfs.io/ipfs/')
+      const metadata = await fetch(metadataUrl).then(res => res.json()) as {
+        name: string
+        description: string
+        image: string
+      }
+
+      resultados.push({
+        tokenId: tokenId.toString(),
+        comentario,
+        nota,
+        emisor,
+        metadata
+      })
+    } catch (error) {
+      // Detener en errores críticos, pero continuar si el token no existe
+      if (!/execution reverted/i.test((error as Error).message)) {
+        console.error(`Error en tokenId ${tokenId}:`, error)
+      }
+      continue
+    }
+  }
+
+  return resultados
+}
+
+// utils/errors.ts
+// utils/errors.ts
+export function parseBlockchainError(error: unknown): string {
+  if (typeof error === 'object' && error !== null) {
+    const e = error as {
+      error?: { message?: string }
+      message?: string
+      reason?: string
+    }
+
+    if (e.error?.message) return e.error.message
+    if (e.message) return e.message
+    if (e.reason) return e.reason
+  }
+
+  return 'Ocurrió un error inesperado al interactuar con el contrato.'
 }
