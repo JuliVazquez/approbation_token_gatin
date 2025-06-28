@@ -100,7 +100,7 @@ const CheckPanel = ({ wallet, provider, onValid, onReset }: Props) => {
       </div>
 
       <ul className="list-disc ml-6 text-sm space-y-1">
-        {renderEstado(cumpleCantidad, 'Posee al menos 10 NFTs del contrato')}
+        {renderEstado(cumpleCantidad, 'Posee los 10 NFTs de asistencia a clases.')}
         {renderEstado(cumpleFechas, 'Todos fueron minteados antes del 28/05/2025')}
         {renderEstado(sinMovimientos, 'Ningún NFT fue transferido luego de recibido')}
       </ul>

@@ -53,7 +53,7 @@ const handleSubmit = async () => {
     if (txResult) {
       setToast({
         visible: true,
-        message: '✅ NFT de aprobación emitido correctamente',
+        message: 'NFT de aprobación emitido correctamente',
         hash: txResult.hash
       })
 
@@ -63,8 +63,8 @@ const handleSubmit = async () => {
       setNota('')
     }
   } catch (err) {
-    console.error("❌ Error al emitir NFT de aprobación:", err)
-    alert("Error al emitir el NFT.")
+    console.error("Error al emitir NFT de aprobación:", err)
+    alert("Error al emitir el Approval NFT. Verifique que cumple con las condiciones de emision")
   }
 }
 

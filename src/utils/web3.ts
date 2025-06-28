@@ -4,8 +4,6 @@ import type { Eip1193Provider } from "ethers";
 import { ABIS } from '../abi/index.js'
 export type { NFTAsist }
 
-
-// Dirección del contrato
 const MAX_TOKEN_ID = 100;
 
 interface NFTAsist {
@@ -105,8 +103,6 @@ export const fetchNFTsFromWallet = async (
   contractAddr: string,
 ): Promise<NFTAsist[]> => {
   
-  // const signer = await provider.getSigner()
-  // const contract = new Contract(contractAddr, abi, signer)
   const contract = await getContract(provider, contractAddr, ABIS.CLASS);
   const found: NFTAsist[] = []
 
@@ -231,7 +227,7 @@ export const mintProofOfWorkNFT = async (
   receptor: string,
   data: ProofOfWorkData
 ): Promise<{ hash: string } | null> => {
-  console.log("🔨 Mint ProofOfWorkNFT para:", receptor, data);
+  console.log("Mint ProofOfWorkNFT para:", receptor, data);
   try {
 
     const alteredPoF = [...data.PoF];
@@ -249,13 +245,13 @@ export const mintProofOfWorkNFT = async (
       // alteredPoF,
       { gasLimit: 1000000 }
     );
-    console.log("⏳ Tx enviada:", tx.hash);
+    console.log("Tx enviada:", tx.hash);
     await tx.wait();
-    console.log("✅ NFT emitido correctamente");
+    console.log("NFT emitido correctamente");
     return { hash: tx.hash };
   } catch (err) {
-    console.error("❌ Error al mintear:", err);
-    alert("Error al emitir el NFT de PoW.");
+    console.error("Error al mintear:", err);
+    alert("Error al emitir el NFT de Proof of Work. Verifique que cumple con las condiciones de emision.");
     return null;
   }
 };

@@ -9,7 +9,7 @@ contract ApprovalNFT is ERC1155, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
-    // ✅ Dirección del contrato ProofOfWorkNFT
+    // Dirección del contrato ProofOfWorkNFT
     address public constant POW_CONTRACT_ADDRESS = 0x19AB4dC74E6F5e5e6E86061aEb44D8205AEC575b;
 
     struct Evaluacion {
@@ -64,6 +64,6 @@ contract ApprovalNFT is ERC1155, Ownable {
     }
 
     function uri(uint256) public pure override returns (string memory) {
-        return "ipfs://bafkreibimlves3n72f6ve4grqarekjp6smfbeak5jxq7c66psil5jvtt44";
+        return "ipfs://bafkreidrnwrxzgjnykeyhhmxw5c5mw432tbnyo4i2t5drsq3aeblyxf6x4";
     }
 }

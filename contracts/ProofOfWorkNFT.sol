@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-// ✅ Interface necesaria para validar balance en contrato externo
+// Interface necesaria para validar balance en contrato externo
 interface IClassNFT {
     function balanceOf(address account, uint256 id) external view returns (uint256);
 }
@@ -15,7 +15,7 @@ contract ProofOfWorkNFT is ERC1155, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
 
-    // ✅ Dirección checksum válida del contrato externo
+    // Dirección del contrato ClassNFT
     address constant CLASS_NFT_ADDRESS = 0x1FEe62d24daA9fc0a18341B582937bE1D837F91d;
 
     struct PoFEntry {
@@ -32,7 +32,7 @@ contract ProofOfWorkNFT is ERC1155, Ownable {
 
     mapping(uint256 => TPData) private datos;
 
-    // ✅ Constructor con URI
+    // Constructor con URI
     constructor(string memory uri_) ERC1155(uri_) Ownable(msg.sender) {}
 
     function mintAndTransfer(
@@ -104,7 +104,6 @@ contract ProofOfWorkNFT is ERC1155, Ownable {
         }
     }
 
-    // ❗️Este uri es opcional si no usás el que pasás en el constructor
     function uri(uint256) public pure override returns (string memory) {
         return "ipfs://bafkreibimlves3n72f6ve4grqarekjp6smfbeak5jxq7c66psil5jvtt44";
     }

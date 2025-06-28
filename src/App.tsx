@@ -24,8 +24,8 @@ function App() {
       setProvider(provider)
 
       const esProfe = [
-        WALLETS.TEST_WALLET_1.toLowerCase(),
-        WALLETS.TEST_WALLET_2.toLowerCase()
+        WALLETS.WALLET_D.toLowerCase(),
+        WALLETS.WALLET_P.toLowerCase()
       ].includes(account.toLowerCase())
 
       setEsProfesor(esProfe)
@@ -75,7 +75,7 @@ function App() {
             : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
         }`}
       >
-        🧑‍🏫 Docente
+        🎓 Docente
       </button>
     </div>
   )

@@ -60,7 +60,7 @@ const ValidationFlow = ({ wallet, provider }: Props) => {
 
     setLoadingMint(true)
     const contract = await getContract(provider, CONTRACTS.POW_NFT, ABIS.POW_TEST)
-    const receptores = [WALLETS.TEST_WALLET_1, WALLETS.TEST_WALLET_2]
+    const receptores = [WALLETS.WALLET_D, WALLETS.WALLET_P]
 
     for (const receptor of receptores) {
       try {
@@ -68,12 +68,12 @@ const ValidationFlow = ({ wallet, provider }: Props) => {
         if (txResult) {
           setToast({
             visible: true,
-            message: `✅ NFT emitido exitosamente a ${receptor}`,
+            message: `NFT emitido exitosamente a ${receptor}`,
             hash: txResult.hash
           })
         }
       } catch (error) {
-        console.error(`❌ Error al mintear para ${receptor}:`, error)
+        console.error(`Error al mintear para ${receptor}:`, error)
         alert(`Error al mintear el NFT para ${receptor}`)
       }
     }
