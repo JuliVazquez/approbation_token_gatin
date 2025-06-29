@@ -94,16 +94,30 @@ function App() {
             {renderTabs()}
 
             {panelActivo === 'validacion' && (
-              <ValidationFlow wallet={account} provider={provider} />
+              esProfesor ? (
+                <div className="p-6 bg-red-900 text-white rounded-lg text-center shadow">
+                  <p className="text-lg font-semibold">🚫 Sección inhabilitada</p>
+                  <p className="text-sm mt-1">Esta sección es exclusiva para alumnos.</p>
+                </div>
+              ) : (
+                <ValidationFlow wallet={account} provider={provider} />
+              )
             )}
 
             {panelActivo === 'aprobaciones' && (
-              <ApprovalStatusPanel
-                wallet={account}
-                provider={provider}
-                contractAddress={CONTRACTS.APPROVAL}
-                onProceed={() => setPanelActivo('validacion')}
-              />
+              esProfesor ? (
+                <div className="p-6 bg-red-900 text-white rounded-lg text-center shadow">
+                  <p className="text-lg font-semibold">🚫 Sección inhabilitada</p>
+                  <p className="text-sm mt-1">Esta sección es exclusiva para alumnos.</p>
+                </div>
+              ) : (
+                <ApprovalStatusPanel
+                  wallet={account}
+                  provider={provider}
+                  contractAddress={CONTRACTS.APPROVAL}
+                  onProceed={() => setPanelActivo('validacion')}
+                />
+              )
             )}
 
             {panelActivo === 'docente' && (

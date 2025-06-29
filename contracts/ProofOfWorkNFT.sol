@@ -46,7 +46,7 @@ contract ProofOfWorkNFT is ERC1155, Ownable {
         require(bytes(alumno).length > 0, "Alumno requerido");
         require(emisor == msg.sender, "Solo el alumno puede emitir");
 
-        // ✅ Validar contractAddress y propiedad del token
+        // Validar contractAddress y propiedad del token
         IClassNFT classNFT = IClassNFT(CLASS_NFT_ADDRESS);
         for (uint256 i = 0; i < PoF.length; i++) {
             require(

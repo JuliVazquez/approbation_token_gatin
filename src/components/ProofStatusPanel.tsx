@@ -108,11 +108,11 @@ const handleSubmit = async () => {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
           </svg>
-          <span className="ml-3 text-sm text-gray-300">Cargando datos del NFT de aprobación...</span>
+          <span className="ml-3 text-sm text-gray-300">Buscando NFT de prueba de trabajo...</span>
         </div>
       )}
 
-      {!loading && !asistData && <div className="text-sm text-red-400">No se encontró NFT de aprobación.</div>}
+      {!loading && !asistData && <div className="text-sm text-red-400">No se encontró NFT de prueba de trabajo para el contrato ingresado.</div>}
 
       {asistData && !mostrarFormulario && (
         <div className="space-y-4">
