@@ -21,19 +21,21 @@ const ProofStatusPanel = ({ wallet, provider, setToast }: Props) => {
   const [comentario, setComentario] = useState('')
   const [approvedHash, setApprovedHash] = useState<string | null>(null)
 
-  const fetchData = async () => {
-    if (!contractAddress) return
-    setLoading(true)
-    try {
-      const nft = await getProofOfWorkNFTForWallet(wallet, provider, contractAddress)
-      setAsistData(nft)
-    } catch (err) {
-      console.error('Error al obtener datos del NFT:', err)
-      setAsistData(null)
-    } finally {
-      setLoading(false)
-    }
+const fetchData = async () => {
+  if (!contractAddress) return
+  setLoading(true)
+  try {
+    console.log("Buscando ProofOfWorkNFT con wallet:", wallet, "en contrato:", contractAddress)
+    const nft = await getProofOfWorkNFTForWallet(wallet, provider, contractAddress)
+    console.log("NFT Proof of Work recibido:", nft)
+    setAsistData(nft)
+  } catch (err) {
+    console.error('Error al obtener datos del NFT:', err)
+    setAsistData(null)
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleDisconnect = () => {
     setAsistData(null)
