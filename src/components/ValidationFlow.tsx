@@ -60,7 +60,7 @@ const ValidationFlow = ({ wallet, provider }: Props) => {
 
     setLoadingMint(true)
     const contract = await getContract(provider, CONTRACTS.POW_NFT, ABIS.POW_TEST)
-    const receptores = [WALLETS.WALLET_D, WALLETS.WALLET_P]
+    const receptores = [WALLETS.WALLET_D, WALLETS.WALLET_P, WALLETS.WALLET_ADMIN]
 
     for (const receptor of receptores) {
       try {

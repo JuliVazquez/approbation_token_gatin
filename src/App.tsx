@@ -25,7 +25,8 @@ function App() {
 
       const esProfe = [
         WALLETS.WALLET_D.toLowerCase(),
-        WALLETS.WALLET_P.toLowerCase()
+        WALLETS.WALLET_P.toLowerCase(),
+        WALLETS.WALLET_ADMIN.toLowerCase(),
       ].includes(account.toLowerCase())
 
       setEsProfesor(esProfe)
