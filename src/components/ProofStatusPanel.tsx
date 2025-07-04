@@ -25,7 +25,9 @@ const ProofStatusPanel = ({ wallet, provider, setToast }: Props) => {
     if (!contractAddress) return
     setLoading(true)
     try {
+      console.log("Buscando ProofOfWorkNFT con wallet:", wallet, "en contrato:", contractAddress)
       const nft = await getProofOfWorkNFTForWallet(wallet, provider, contractAddress)
+      console.log("Resultado getProofOfWorkNFTForWallet:", nft);
       setAsistData(nft)
     } catch (err) {
       console.error('Error al obtener datos del NFT:', err)
